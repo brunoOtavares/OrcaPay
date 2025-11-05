@@ -1,0 +1,30 @@
+.header {
+  width: 100%;
+  padding: 1rem 2rem;
+  background: var(--surface-card);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: var(--shadow-card);
+  margin-bottom: 2rem;
+}
+
+.hourlyRate {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.label {
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+.value {
+  color: var(--accent-neutral);
+  font-size: 1.2rem;
+  font-weight: 600;
+  background: var(--surface-input);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  box-shadow: var(--shadow-input);
+}
