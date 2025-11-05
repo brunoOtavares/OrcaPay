@@ -3,7 +3,7 @@
   max-width: 1400px;
   margin: 0 auto;
   padding: 0;
-  height: calc(100vh - 120px);
+  min-height: calc(100vh - 120px);
   display: flex;
   flex-direction: column;
 }
@@ -30,8 +30,7 @@
 
 .content {
   flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: visible;
 }
 
 .placeholder {

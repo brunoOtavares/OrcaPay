@@ -9,6 +9,8 @@ interface Cost {
 interface CalculatorData {
   fixedCosts: Cost[];
   variableCosts: Cost[];
+  salary1?: number;
+  salary2?: number;
   desiredSalary: number;
   hoursPerDay: number;
   daysPerMonth: number;
@@ -37,20 +39,23 @@ export function BudgetCalculator() {
     return {
       fixedCosts: [],
       variableCosts: [],
+      salary1: 0,
+      salary2: 0,
       desiredSalary: 0,
       hoursPerDay: 8,
       daysPerMonth: 20
     };
   };
 
-  const [fixedCosts, setFixedCosts] = useState<Cost[]>(loadInitialData().fixedCosts);
-  const [variableCosts, setVariableCosts] = useState<Cost[]>(loadInitialData().variableCosts);
-  const [desiredSalary, setDesiredSalary] = useState<number>(loadInitialData().desiredSalary);
-  const [hoursPerDay, setHoursPerDay] = useState<number>(loadInitialData().hoursPerDay);
-  const [daysPerMonth, setDaysPerMonth] = useState<number>(loadInitialData().daysPerMonth);
+  const initialData = loadInitialData();
+  const [fixedCosts, setFixedCosts] = useState<Cost[]>(initialData.fixedCosts);
+  const [variableCosts, setVariableCosts] = useState<Cost[]>(initialData.variableCosts);
+  const [hoursPerDay, setHoursPerDay] = useState<number>(initialData.hoursPerDay);
+  const [daysPerMonth, setDaysPerMonth] = useState<number>(initialData.daysPerMonth);
   const [newFixedCost, setNewFixedCost] = useState<Cost>({ description: '', value: 0 });
   const [newVariableCost, setNewVariableCost] = useState<Cost>({ description: '', value: 0 });
-  const [newSalary, setNewSalary] = useState<number>(0);
+  const [salary1, setSalary1] = useState<number>(initialData.salary1 || 0);
+  const [salary2, setSalary2] = useState<number>(initialData.salary2 || 0);
 
 
   const handleCurrencyInput = (value: string, setter: (value: number) => void) => {
@@ -72,10 +77,18 @@ export function BudgetCalculator() {
     }
   };
 
+  const calculateAverageSalary = () => {
+    if (salary1 > 0 && salary2 > 0) {
+      return (salary1 + salary2) / 2;
+    }
+    return salary1 || salary2 || 0;
+  };
+
   const calculateTotalMonthlyCosts = () => {
     const totalFixed = fixedCosts.reduce((sum, cost) => sum + cost.value, 0);
     const totalVariable = variableCosts.reduce((sum, cost) => sum + cost.value, 0);
-    return totalFixed + totalVariable + desiredSalary;
+    const averageSalary = calculateAverageSalary();
+    return totalFixed + totalVariable + averageSalary;
   };
 
   const calculateTotalHours = () => {
@@ -91,10 +104,13 @@ export function BudgetCalculator() {
 
   // Salva dados no Local Storage quando houver mudanças
   useEffect(() => {
+    const averageSalary = calculateAverageSalary();
     const data: CalculatorData = {
       fixedCosts,
       variableCosts,
-      desiredSalary,
+      salary1,
+      salary2,
+      desiredSalary: averageSalary,
       hoursPerDay,
       daysPerMonth
     };
@@ -111,14 +127,7 @@ export function BudgetCalculator() {
       // Dispara evento customizado para atualizar outros componentes
       window.dispatchEvent(new CustomEvent('hourlyRateUpdated', { detail: { hourlyRate: null } }));
     }
-  }, [fixedCosts, variableCosts, desiredSalary, hoursPerDay, daysPerMonth]);
-
-  const addDesiredSalary = () => {
-    if (newSalary > 0) {
-      setDesiredSalary(newSalary);
-      setNewSalary(0);
-    }
-  };
+  }, [fixedCosts, variableCosts, salary1, salary2, hoursPerDay, daysPerMonth]);
 
   return (
     <div className={styles.budgetCalculator}>
@@ -147,8 +156,15 @@ export function BudgetCalculator() {
               className={styles.input}
               type="text"
               placeholder="R$ 0,00"
-              value={newFixedCost.value ? formatCurrency(newFixedCost.value) : ''}
-              onChange={(e) => handleCurrencyInput(e.target.value, (value) => setNewFixedCost({ ...newFixedCost, value }))}
+              value={newFixedCost.value > 0 ? formatCurrency(newFixedCost.value) : ''}
+              onChange={(e) => {
+                const cleanValue = e.target.value.replace(/\D/g, '');
+                if (cleanValue === '') {
+                  setNewFixedCost({ ...newFixedCost, value: 0 });
+                } else {
+                  handleCurrencyInput(e.target.value, (value) => setNewFixedCost({ ...newFixedCost, value }));
+                }
+              }}
             />
             <button className={styles.button} onClick={addFixedCost}>
               Adicionar
@@ -178,8 +194,15 @@ export function BudgetCalculator() {
               className={styles.input}
               type="text"
               placeholder="R$ 0,00"
-              value={newVariableCost.value ? formatCurrency(newVariableCost.value) : ''}
-              onChange={(e) => handleCurrencyInput(e.target.value, (value) => setNewVariableCost({ ...newVariableCost, value }))}
+              value={newVariableCost.value > 0 ? formatCurrency(newVariableCost.value) : ''}
+              onChange={(e) => {
+                const cleanValue = e.target.value.replace(/\D/g, '');
+                if (cleanValue === '') {
+                  setNewVariableCost({ ...newVariableCost, value: 0 });
+                } else {
+                  handleCurrencyInput(e.target.value, (value) => setNewVariableCost({ ...newVariableCost, value }));
+                }
+              }}
             />
             <button className={styles.button} onClick={addVariableCost}>
               Adicionar
@@ -196,23 +219,47 @@ export function BudgetCalculator() {
         </div>
 
         <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>Salário Desejado</h2>
-          <div className={styles.inputGroup}>
-            <input
-              className={styles.input}
-              type="text"
-              placeholder="R$ 0,00"
-              value={newSalary ? formatCurrency(newSalary) : ''}
-              onChange={(e) => handleCurrencyInput(e.target.value, setNewSalary)}
-            />
-            <button className={styles.button} onClick={addDesiredSalary}>
-              Definir Salário
-            </button>
-          </div>
-          {desiredSalary > 0 && (
-            <div className={styles.costItem}>
-              <span>Salário Definido:</span>
-              <span>{formatCurrency(desiredSalary)}</span>
+          <h2 className={styles.sectionTitle}>
+            Media Salarial Desejada
+            <div className={styles.salaryInputsInline}>
+              <input
+                className={styles.inputInline}
+                type="text"
+                placeholder="R$ 0,00"
+                value={salary1 > 0 ? formatCurrency(salary1) : ''}
+                onChange={(e) => {
+                  const cleanValue = e.target.value.replace(/\D/g, '');
+                  if (cleanValue === '') {
+                    setSalary1(0);
+                  } else {
+                    handleCurrencyInput(e.target.value, setSalary1);
+                  }
+                }}
+              />
+              
+              <input
+                className={styles.inputInline}
+                type="text"
+                placeholder="R$ 0,00"
+                value={salary2 > 0 ? formatCurrency(salary2) : ''}
+                onChange={(e) => {
+                  const cleanValue = e.target.value.replace(/\D/g, '');
+                  if (cleanValue === '') {
+                    setSalary2(0);
+                  } else {
+                    handleCurrencyInput(e.target.value, setSalary2);
+                  }
+                }}
+              />
+            </div>
+          </h2>
+          {(salary1 > 0 || salary2 > 0) && (
+            <div className={styles.salaryResult}>
+  
+      
+              <span className={styles.salaryValue}>{formatCurrency(salary1)}</span>
+              <span className={styles.dash}>-</span>
+              <span className={styles.salaryValue}>{formatCurrency(salary2)}</span>
             </div>
           )}
         </div>
@@ -225,10 +272,10 @@ export function BudgetCalculator() {
               <input
                 className={styles.input}
                 type="number"
-                min="1"
+                min="0"
                 max="24"
-                value={hoursPerDay}
-                onChange={(e) => setHoursPerDay(Number(e.target.value))}
+                value={hoursPerDay || ''}
+                onChange={(e) => setHoursPerDay(e.target.value === '' ? 0 : Number(e.target.value))}
                 placeholder="Ex: 8"
               />
             </div>
@@ -237,10 +284,10 @@ export function BudgetCalculator() {
               <input
                 className={styles.input}
                 type="number"
-                min="1"
+                min="0"
                 max="31"
-                value={daysPerMonth}
-                onChange={(e) => setDaysPerMonth(Number(e.target.value))}
+                value={daysPerMonth || ''}
+                onChange={(e) => setDaysPerMonth(e.target.value === '' ? 0 : Number(e.target.value))}
                 placeholder="Ex: 20"
               />
             </div>

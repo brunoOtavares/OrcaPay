@@ -202,17 +202,12 @@ export function MakeQuote({ onSaveQuote }: MakeQuoteProps) {
               
               <div className={styles.formGroup}>
                 <label>Tipo:</label>
-                <select
+                <input
+                  type="text"
                   value={projectDetails.projectType}
                   onChange={(e) => setProjectDetails({...projectDetails, projectType: e.target.value})}
-                >
-                  <option value="">Selecione</option>
-                  <option value="criacao-logo">Logo</option>
-                  <option value="design-post">Post</option>
-                  <option value="web-design">Web</option>
-                  <option value="identidade-visual">Identidade</option>
-                  <option value="outro">Outro</option>
-                </select>
+                  placeholder="Ex: Logo, Post, Web, Identidade Visual..."
+                />
               </div>
               
               <div className={styles.formGroup}>
@@ -246,8 +241,8 @@ export function MakeQuote({ onSaveQuote }: MakeQuoteProps) {
                     type="number"
                     min="0"
                     step="0.5"
-                    value={timeFactors.research}
-                    onChange={(e) => setTimeFactors({...timeFactors, research: parseFloat(e.target.value) || 0})}
+                    value={timeFactors.research || ''}
+                    onChange={(e) => setTimeFactors({...timeFactors, research: e.target.value === '' ? 0 : parseFloat(e.target.value)})}
                   />
                 </div>
                 
@@ -257,8 +252,8 @@ export function MakeQuote({ onSaveQuote }: MakeQuoteProps) {
                     type="number"
                     min="0"
                     step="0.5"
-                    value={timeFactors.creation}
-                    onChange={(e) => setTimeFactors({...timeFactors, creation: parseFloat(e.target.value) || 0})}
+                    value={timeFactors.creation || ''}
+                    onChange={(e) => setTimeFactors({...timeFactors, creation: e.target.value === '' ? 0 : parseFloat(e.target.value)})}
                   />
                 </div>
                 
@@ -268,8 +263,8 @@ export function MakeQuote({ onSaveQuote }: MakeQuoteProps) {
                     type="number"
                     min="0"
                     step="0.5"
-                    value={timeFactors.presentation}
-                    onChange={(e) => setTimeFactors({...timeFactors, presentation: parseFloat(e.target.value) || 0})}
+                    value={timeFactors.presentation || ''}
+                    onChange={(e) => setTimeFactors({...timeFactors, presentation: e.target.value === '' ? 0 : parseFloat(e.target.value)})}
                   />
                 </div>
                 
@@ -279,8 +274,8 @@ export function MakeQuote({ onSaveQuote }: MakeQuoteProps) {
                     type="number"
                     min="0"
                     step="0.5"
-                    value={timeFactors.delivery}
-                    onChange={(e) => setTimeFactors({...timeFactors, delivery: parseFloat(e.target.value) || 0})}
+                    value={timeFactors.delivery || ''}
+                    onChange={(e) => setTimeFactors({...timeFactors, delivery: e.target.value === '' ? 0 : parseFloat(e.target.value)})}
                   />
                 </div>
               </div>
@@ -340,8 +335,8 @@ export function MakeQuote({ onSaveQuote }: MakeQuoteProps) {
                   <input
                     type="number"
                     min="0"
-                    value={priceModifiers.revisions}
-                    onChange={(e) => setPriceModifiers({...priceModifiers, revisions: parseInt(e.target.value) || 0})}
+                    value={priceModifiers.revisions || ''}
+                    onChange={(e) => setPriceModifiers({...priceModifiers, revisions: e.target.value === '' ? 0 : parseInt(e.target.value)})}
                   />
                 </div>
                 
@@ -364,8 +359,12 @@ export function MakeQuote({ onSaveQuote }: MakeQuoteProps) {
               </div>
               
               <div className={styles.finalPrice}>
-                <h4>Preço Final:</h4>
-                <div className={styles.priceValue}>{formatCurrency(finalPrice)}</div>
+                <h4>Faixa de Preço:</h4>
+                <div className={styles.priceRange}>
+                  <span className={styles.priceMin}>{formatCurrency(finalPrice)}</span>
+                  <span className={styles.priceSeparator}>até</span>
+                  <span className={styles.priceMax}>{formatCurrency(finalPrice * 1.3)}</span>
+                </div>
               </div>
 
               <button 
