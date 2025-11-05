@@ -123,7 +123,7 @@ export function BudgetCalculator() {
   return (
     <div className={styles.budgetCalculator}>
       <div className={styles.header}>
-        <h1>Calculo De Valor/Hora</h1>
+        <h1>Calcule o Valor da sua Hora</h1>
       </div>
       
       <div className={styles.mainGrid}>
@@ -170,7 +170,7 @@ export function BudgetCalculator() {
             <input
               className={styles.input}
               type="text"
-              placeholder="Ex: Reservas, Material de Escritório, Transporte, Alimentação"
+              placeholder="Ex: Manuntençoes , cursos"
               value={newVariableCost.description}
               onChange={(e) => setNewVariableCost({ ...newVariableCost, description: e.target.value })}
             />

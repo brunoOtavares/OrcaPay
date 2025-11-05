@@ -22,7 +22,22 @@ interface PriceModifiers {
   revisions: number;
 }
 
-export function MakeQuote() {
+interface MakeQuoteProps {
+  onSaveQuote: (quote: {
+    clientName: string;
+    projectType: string;
+    description: string;
+    deliveryDate: string;
+    totalHours: number;
+    finalPrice: number;
+    complexity: string;
+    urgency: boolean;
+    commercialUse: string;
+    revisions: number;
+  }) => void;
+}
+
+export function MakeQuote({ onSaveQuote }: MakeQuoteProps) {
   const [hasHourlyRate, setHasHourlyRate] = useState(false);
   const [hourlyRate, setHourlyRate] = useState<number>(0);
   const [totalHours, setTotalHours] = useState<number>(0);
@@ -55,7 +70,7 @@ export function MakeQuote() {
     }
 
     // Listen for custom hourly rate update events
-    const handleHourlyRateUpdate = (event: any) => {
+    const handleHourlyRateUpdate = () => {
       const updatedHourlyRate = localStorage.getItem('orcapay_hourly_rate');
       setHasHourlyRate(!!updatedHourlyRate);
       if (updatedHourlyRate) {
@@ -106,6 +121,51 @@ export function MakeQuote() {
     });
   };
 
+  const handleConfirmQuote = () => {
+    if (!projectDetails.clientName || !projectDetails.projectType) {
+      alert('Por favor, preencha o nome do cliente e o tipo de projeto.');
+      return;
+    }
+
+    if (totalHours === 0) {
+      alert('Por favor, adicione as horas do projeto.');
+      return;
+    }
+
+    onSaveQuote({
+      clientName: projectDetails.clientName,
+      projectType: projectDetails.projectType,
+      description: projectDetails.description,
+      deliveryDate: projectDetails.deliveryDate,
+      totalHours,
+      finalPrice,
+      complexity: priceModifiers.complexity,
+      urgency: priceModifiers.urgency,
+      commercialUse: priceModifiers.commercialUse,
+      revisions: priceModifiers.revisions
+    });
+
+    // Limpar formulário
+    setProjectDetails({
+      clientName: '',
+      projectType: '',
+      description: '',
+      deliveryDate: ''
+    });
+    setTimeFactors({
+      research: 0,
+      creation: 0,
+      presentation: 0,
+      delivery: 0
+    });
+    setPriceModifiers({
+      complexity: 'media',
+      urgency: false,
+      commercialUse: 'local',
+      revisions: 2
+    });
+  };
+
   if (!hasHourlyRate) {
     return (
       <div className={styles.container}>
@@ -121,7 +181,7 @@ export function MakeQuote() {
   return (
     <div className={styles.container}>
       <div className={styles.quoteContent}>
-        <h2>Estrutura de Entrada para Orçamento de Projeto</h2>
+        <h2>Faça o Orçamento do seu Projeto</h2>
         
         <div className={styles.mainGrid}>
           {/* Coluna da Esquerda - Informações do Projeto */}
@@ -307,6 +367,13 @@ export function MakeQuote() {
                 <h4>Preço Final:</h4>
                 <div className={styles.priceValue}>{formatCurrency(finalPrice)}</div>
               </div>
+
+              <button 
+                className={styles.confirmButton}
+                onClick={handleConfirmQuote}
+              >
+                ✓ Confirmar e Enviar para Clientes
+              </button>
             </section>
           </div>
         </div>

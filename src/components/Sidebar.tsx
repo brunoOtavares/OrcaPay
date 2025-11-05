@@ -31,7 +31,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   }, []);
 
   const menuItems = [
-    { id: 'calc-hour', label: 'Calcular Valor/Hora', disabled: false },
+    { id: 'calc-hour', label: 'Calcule o Valor/Hora', disabled: false },
     { id: 'budget', label: 'Fazer Orçamento', disabled: false },
     { id: 'clients', label: 'Clientes', disabled: false },
     { id: 'profile', label: 'Perfil', disabled: false },

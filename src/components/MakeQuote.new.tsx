@@ -114,7 +114,7 @@ export function MakeQuote() {
       <div className={styles.quoteContent}>
         <h2>
           <span role="img" aria-label="document">📋</span>
-          Estrutura de Entrada para Orçamento de Projeto
+          Estrutura de Entrada para Orçamento de 
         </h2>
         
         <div className={styles.mainGrid}>

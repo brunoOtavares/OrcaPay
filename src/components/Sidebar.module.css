@@ -1,138 +1,221 @@
 .sidebar {
-  width: 260px;
+  width: 280px;
   height: 100vh;
   background: var(--bg-secondary);
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
-  padding: 1.5rem 0;
+  padding: var(--spacing-xl) 0;
   position: fixed;
   left: 0;
   top: 0;
   z-index: 100;
+  box-shadow: var(--shadow-lg);
 }
 
 .logo {
-  padding: 0 1.5rem 2rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  margin-bottom: 2rem;
+  padding: 0 var(--spacing-xl) var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+  position: relative;
+}
+
+.logo::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: var(--spacing-xl);
+  right: var(--spacing-xl);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-color), transparent);
 }
 
 .logo h1 {
-  color: var(--accent-primary);
-  font-size: 1.8rem;
-  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 1.75rem;
+  font-weight: 800;
   margin: 0;
-  text-align: center;
+  text-align: left;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.logo h1::before {
+  content: '💰';
+  font-size: 2rem;
 }
 
 .navigation {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  padding: 0 1rem;
+  gap: var(--spacing-xs);
+  padding: 0 var(--spacing-md);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.navigation::-webkit-scrollbar {
+  width: 4px;
+}
+
+.navigation::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.navigation::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 2px;
 }
 
 .navItem {
   display: flex;
   align-items: center;
-  padding: 1.2rem 1.5rem;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
   background: transparent;
   border: none;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   color: var(--text-secondary);
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--transition-normal);
   text-align: left;
   width: 100%;
   position: relative;
+  letter-spacing: -0.01em;
+}
+
+.navItem::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 0;
+  background: var(--accent-primary);
+  border-radius: 0 3px 3px 0;
+  transition: height var(--transition-normal);
 }
 
 .navItem.disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
-  color: var(--text-secondary);
-  background: rgba(255, 255, 255, 0.03);
-  margin-bottom: 0.5rem;
+  color: var(--text-muted);
 }
 
 .navItem.disabled:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: transparent;
   transform: none;
 }
 
-.navItem:hover {
-  background: rgba(74, 124, 89, 0.1);
+.navItem:not(.disabled):hover {
+  background: var(--surface-hover);
   color: var(--text-primary);
-  transform: translateX(5px);
+  transform: translateX(4px);
+}
+
+.navItem:not(.disabled):hover::before {
+  height: 60%;
 }
 
 .navItem.active {
-  background: var(--accent-primary);
-  color: white;
-  box-shadow: 0 4px 12px rgba(74, 124, 89, 0.3);
+  background: var(--gradient-primary);
+  color: var(--text-primary);
+  font-weight: 600;
+  box-shadow: var(--shadow-glow);
+}
+
+.navItem.active::before {
+  height: 100%;
 }
 
 .navItem .label {
-  width: 100%;
+  flex: 1;
   text-align: left;
 }
 
 .layoutButton {
-  padding: 0 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0 var(--spacing-md);
   margin-top: auto;
-  padding-top: 1.5rem;
+  padding-top: var(--spacing-xl);
+  position: relative;
+}
+
+.layoutButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: var(--spacing-xl);
+  right: var(--spacing-xl);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-color), transparent);
 }
 
 .layoutBtn {
   width: 100%;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
+  padding: var(--spacing-md);
+  background: var(--surface-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
   color: var(--text-secondary);
   font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--transition-normal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
 }
 
 .layoutBtn:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--surface-hover);
   color: var(--text-primary);
   border-color: var(--accent-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 240px;
+  }
 }
 
 @media (max-width: 768px) {
   .sidebar {
-    width: 200px;
+    width: 80px;
+  }
+  
+  .logo {
+    padding: 0 var(--spacing-md) var(--spacing-md);
+  }
+  
+  .logo::after {
+    left: var(--spacing-md);
+    right: var(--spacing-md);
   }
   
   .logo h1 {
     font-size: 1.5rem;
+    justify-content: center;
+  }
+  
+  .logo h1::before {
+    font-size: 1.75rem;
+  }
+  
+  .navigation {
+    padding: 0 var(--spacing-sm);
   }
   
   .navItem {
-    padding: 1rem 1.2rem;
-    font-size: 0.9rem;
-  }
-}
-
-@media (max-width: 640px) {
-  .sidebar {
-    width: 70px;
-  }
-  
-  .logo h1 {
-    font-size: 1.2rem;
-  }
-  
-  .navItem {
-    padding: 1rem;
+    padding: var(--spacing-md);
     justify-content: center;
   }
   
@@ -140,12 +223,37 @@
     display: none;
   }
   
+  .navItem::before {
+    display: none;
+  }
+  
+  .layoutButton {
+    padding: 0 var(--spacing-sm);
+  }
+  
+  .layoutButton::before {
+    left: var(--spacing-sm);
+    right: var(--spacing-sm);
+  }
+  
   .layoutBtn {
+    padding: var(--spacing-md);
     font-size: 0;
   }
   
-  .layoutBtn::before {
+  .layoutBtn::after {
     content: '⚙️';
-    font-size: 1.2rem;
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform var(--transition-normal);
+  }
+  
+  .sidebar.open {
+    transform: translateX(0);
   }
 }
