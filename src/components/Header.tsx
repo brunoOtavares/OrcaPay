@@ -9,7 +9,7 @@ export function Header({ }: HeaderProps) {
 
   useEffect(() => {
     const loadHourlyRate = () => {
-      const savedRate = localStorage.getItem('orcapay_hourly_rate');
+      const savedRate = localStorage.getItem('calculocerto_hourly_rate');
       if (savedRate) {
         setHourlyRate(parseFloat(savedRate));
       } else {

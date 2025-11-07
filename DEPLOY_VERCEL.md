@@ -112,19 +112,16 @@ O arquivo `vercel.json` já está configurado para SPA (Single Page Application)
 }
 ```
 
-## ✅ Checklist Final
 
-- [ ] Firebase configurado (Authentication + Firestore)
-- [ ] Regras de segurança do Firestore publicadas
-- [ ] Projeto commitado no GitHub
-- [ ] Importado na Vercel
-- [ ] Deploy concluído com sucesso
-- [ ] Domínio da Vercel adicionado no Firebase
-- [ ] Testado login/registro
-- [ ] Testado criação de orçamentos
+## ✅ Verificação Final
 
-## 🎉 Pronto!
+Teste tudo no ambiente de produção:
+- ✅ Login funciona
+- ✅ Cadastro funciona
+- ✅ Calculadora salva dados
+- ✅ Orçamentos são salvos
+- ✅ Perfil mostra projetos
 
-Seu OrçaPay está online e funcional!
+Seu CálculoCerto está online e funcional!
 
-URL de exemplo: `https://orcapay.vercel.app`
+URL de exemplo: `https://calculocerto.vercel.app`

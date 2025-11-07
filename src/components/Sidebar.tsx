@@ -26,7 +26,7 @@ export function Sidebar({ activeTab, onTabChange, isOpen = false }: SidebarProps
   return (
     <div className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}>
       <div className={styles.logo}>
-        <h1>OrçaPay</h1>
+        <h1>CálculoCerto</h1>
       </div>
       
       <nav className={styles.navigation}>

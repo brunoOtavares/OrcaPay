@@ -84,11 +84,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           fontSize: '24px',
           fontFamily: 'Inter, sans-serif'
         }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ marginBottom: '20px' }}>
-              <h1 style={{ fontSize: '48px', margin: '0 0 10px 0' }}>OrçaPay</h1>
-              <p style={{ fontSize: '16px', opacity: 0.9 }}>Carregando...</p>
-            </div>
+          <div style={{
+            textAlign: 'center'
+          }}>
+            <h1 style={{ fontSize: '48px', margin: '0 0 10px 0' }}>CálculoCerto</h1>
+            <p style={{ fontSize: '18px', color: 'rgba(255, 255, 255, 0.7)' }}>Carregando...</p>
           </div>
         </div>
       ) : (

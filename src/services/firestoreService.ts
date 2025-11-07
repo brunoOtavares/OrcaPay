@@ -60,6 +60,15 @@ export const createUserProfile = async (userId: string, email: string): Promise<
       email,
       createdAt: new Date().toISOString(),
       hourlyRate: 50,
+      calculatorData: {
+        fixedCosts: [],
+        variableCosts: [],
+        salary1: 0,
+        salary2: 0,
+        desiredSalary: 0,
+        hoursPerDay: 8,
+        daysPerMonth: 20
+      },
       settings: {
         complexityMultipliers: {
           baixa: 1.5,

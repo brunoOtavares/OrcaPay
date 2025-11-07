@@ -49,7 +49,7 @@ export function MakeQuote() {
   const [totalHours, setTotalHours] = useState<number>(0);
 
   useEffect(() => {
-    const savedHourlyRate = localStorage.getItem('orcapay_hourly_rate');
+    const savedHourlyRate = localStorage.getItem('calculocerto_hourly_rate');
     setHasHourlyRate(!!savedHourlyRate);
     if (savedHourlyRate) {
       setHourlyRate(parseFloat(savedHourlyRate));

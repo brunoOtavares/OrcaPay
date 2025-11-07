@@ -598,6 +598,8 @@
   padding: var(--spacing-2xl);
   max-width: 600px;
   width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
   box-shadow: var(--shadow-2xl);
   border: 1px solid var(--border-color);
   animation: slideIn 0.3s ease-out;
@@ -637,6 +639,7 @@
   padding: var(--spacing-sm) 0;
   border-bottom: 1px solid var(--border-subtle);
   gap: var(--spacing-md);
+  flex-wrap: wrap;
 }
 
 .infoRow:last-child {
@@ -647,7 +650,7 @@
   color: var(--text-secondary);
   font-size: 0.9rem;
   font-weight: 500;
-  min-width: 140px;
+  min-width: 120px;
 }
 
 .infoRow .value {
@@ -655,6 +658,7 @@
   font-weight: 600;
   text-align: right;
   flex: 1;
+  word-break: break-word;
 }
 
 .modalPriceInput {
@@ -692,6 +696,7 @@
   display: flex;
   gap: var(--spacing-md);
   justify-content: flex-end;
+  flex-wrap: wrap;
 }
 
 .cancelButton,
@@ -706,6 +711,9 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
+  flex: 1;
+  justify-content: center;
+  min-width: 120px;
 }
 
 .cancelButton {
@@ -733,4 +741,52 @@
 
 .confirmModalButton:active {
   transform: translateY(0);
+}
+
+/* Responsividade para Mobile */
+@media (max-width: 768px) {
+  .modalOverlay {
+    padding: var(--spacing-md);
+  }
+
+  .modalContent {
+    padding: var(--spacing-lg);
+    max-height: 85vh;
+  }
+
+  .modalContent h2 {
+    font-size: 1.5rem;
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .modalInfo {
+    padding: var(--spacing-md);
+  }
+
+  .infoRow {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+
+  .infoRow .label {
+    min-width: auto;
+  }
+
+  .infoRow .value {
+    text-align: left;
+  }
+
+  .modalPriceInput input {
+    font-size: 1.1rem;
+  }
+
+  .modalActions {
+    flex-direction: column;
+  }
+
+  .cancelButton,
+  .confirmModalButton {
+    width: 100%;
+    flex: none;
+  }
 }

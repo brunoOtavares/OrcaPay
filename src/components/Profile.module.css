@@ -278,18 +278,76 @@
 
 /* Responsividade */
 @media (max-width: 768px) {
+  .profile {
+    padding: var(--spacing-md);
+    height: auto;
+    min-height: calc(100vh - 120px);
+  }
+
+  .header h2 {
+    font-size: 1.5rem;
+  }
+
   .statsGrid {
     grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
+  .statCard {
+    padding: var(--spacing-md);
+  }
+
+  .statIcon {
+    font-size: 2rem;
+  }
+
+  .statValue {
+    font-size: 1.5rem;
+  }
+
+  .completedSection {
+    padding: var(--spacing-lg);
+  }
+
+  .sectionHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+
+  .sectionHeader h3 {
+    font-size: 1.25rem;
   }
 
   .projectItem {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+  }
+
+  .projectInfo h4 {
+    font-size: 1rem;
+  }
+
+  .projectMeta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
   }
 
   .projectValue {
     margin-left: 0;
     align-self: flex-end;
+    font-size: 1.1rem;
+    margin-top: var(--spacing-sm);
+  }
+
+  .projectType {
+    font-size: 0.7rem;
+  }
+
+  .projectDate {
+    font-size: 0.8rem;
   }
 }

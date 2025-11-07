@@ -30,7 +30,7 @@ const parseCurrencyInput = (value: string): number => {
 };
 
 export function BudgetCalculator() {
-  const { currentUser, userProfile } = useAuth();
+  const { currentUser, userProfile, refreshUserProfile } = useAuth();
   
   // Carrega dados do Firebase ou usa valores padrão
   const loadInitialData = (): CalculatorData => {
@@ -123,40 +123,44 @@ export function BudgetCalculator() {
     }
   }, [userProfile]);
 
-  // Salva dados no Firebase quando houver mudanças
+  // Salva dados no Firebase quando houver mudanças (com debounce)
   useEffect(() => {
     if (!currentUser) return;
 
-    const averageSalary = calculateAverageSalary();
-    const data = {
-      fixedCosts,
-      variableCosts,
-      salary1,
-      salary2,
-      desiredSalary: averageSalary,
-      hoursPerDay,
-      daysPerMonth
-    };
+    const timer = setTimeout(async () => {
+      const averageSalary = calculateAverageSalary();
+      const data = {
+        fixedCosts,
+        variableCosts,
+        salary1,
+        salary2,
+        desiredSalary: averageSalary,
+        hoursPerDay,
+        daysPerMonth
+      };
 
-    // Salvar dados da calculadora no Firebase
-    updateCalculatorData(currentUser.uid, data).catch(err => {
-      console.error('Erro ao salvar dados da calculadora:', err);
-    });
+      try {
+        // Salvar dados da calculadora no Firebase
+        await updateCalculatorData(currentUser.uid, data);
+        
+        // Salvar valor/hora
+        const hourlyRate = calculateHourlyRate();
+        await updateFirebaseHourlyRate(currentUser.uid, hourlyRate);
+        
+        // Atualizar o perfil no contexto
+        await refreshUserProfile();
+        
+        // Dispara evento customizado para atualizar outros componentes
+        window.dispatchEvent(new CustomEvent('hourlyRateUpdated', { 
+          detail: { hourlyRate: hourlyRate > 0 ? hourlyRate : null } 
+        }));
+      } catch (err) {
+        console.error('Erro ao salvar dados:', err);
+      }
+    }, 500); // Aguarda 500ms após última alteração
 
-    // Salvar valor/hora
-    const hourlyRate = calculateHourlyRate();
-    if (hourlyRate > 0) {
-      updateFirebaseHourlyRate(currentUser.uid, hourlyRate).catch(err => {
-        console.error('Erro ao salvar valor/hora no Firebase:', err);
-      });
-      
-      // Dispara evento customizado para atualizar outros componentes
-      window.dispatchEvent(new CustomEvent('hourlyRateUpdated', { detail: { hourlyRate } }));
-    } else {
-      // Dispara evento customizado para atualizar outros componentes
-      window.dispatchEvent(new CustomEvent('hourlyRateUpdated', { detail: { hourlyRate: null } }));
-    }
-  }, [fixedCosts, variableCosts, salary1, salary2, hoursPerDay, daysPerMonth, currentUser]);
+    return () => clearTimeout(timer);
+  }, [fixedCosts, variableCosts, salary1, salary2, hoursPerDay, daysPerMonth, currentUser, refreshUserProfile]);
 
   return (
     <div className={styles.budgetCalculator}>

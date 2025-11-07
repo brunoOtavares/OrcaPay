@@ -28,7 +28,7 @@ export const DEFAULT_SETTINGS: SettingsData = {
   priceRangePercentage: 30,
 };
 
-const STORAGE_KEY = 'orcapay_settings';
+const STORAGE_KEY = 'calculocerto_settings';
 
 export function getSettings(): SettingsData {
   const savedSettings = localStorage.getItem(STORAGE_KEY);

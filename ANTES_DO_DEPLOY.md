@@ -33,7 +33,7 @@ Isso significa: **Usuário autenticado só acessa seus próprios dados!** ✅
 Você DEVE adicionar este domínio no Firebase:
 
 1. Acesse: https://console.firebase.google.com
-2. Selecione projeto: **orca-pay**
+2. Selecione projeto: **calculo-certo**
 3. Vá em: **Authentication** → **Settings** → **Authorized domains**
 4. Clique em: **Add domain**
 5. Cole sua URL da Vercel: `seu-projeto.vercel.app`

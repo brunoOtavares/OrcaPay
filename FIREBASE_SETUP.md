@@ -6,10 +6,10 @@ Para usar o sistema de login/senha, você precisa configurar o Firebase:
 
 ### 1. Criar Projeto no Firebase
 
-1. Acesse o [Firebase Console](https://console.firebase.google.com/)
-2. Clique em "Adicionar projeto"
-3. Dê um nome ao projeto (ex: "orcapay")
-4. Siga os passos até concluir
+1. Acesse o [Console do Firebase](https://console.firebase.google.com/)
+2. Clique em **Adicionar projeto**
+3. Dê um nome ao projeto (ex: "calculocerto")
+4. Desabilite o Google Analytics (opcional)
 
 ### 2. Ativar Autenticação
 
