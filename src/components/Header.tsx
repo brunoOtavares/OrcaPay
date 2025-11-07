@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
-import styles from './Header.module.css';
 
 interface HeaderProps {
   activeTab: string;
 }
 
-export function Header({ activeTab }: HeaderProps) {
-  const [hourlyRate, setHourlyRate] = useState<number | null>(null);
+export function Header({ }: HeaderProps) {
+  const [, setHourlyRate] = useState<number | null>(null);
 
   useEffect(() => {
     const loadHourlyRate = () => {

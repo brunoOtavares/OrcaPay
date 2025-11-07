@@ -38,7 +38,7 @@ export function MakeQuote() {
     presentation: 0,
     delivery: 0
   });
-  const [priceModifiers, setPriceModifiers] = useState<PriceModifiers>({
+  const [priceModifiers] = useState<PriceModifiers>({
     complexity: 'media',
     urgency: false,
     commercialUse: 'local',
