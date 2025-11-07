@@ -8,6 +8,7 @@ import { MakeQuote } from './components/MakeQuote'
 import { Settings } from './components/Settings'
 import Login from './components/Login'
 import Register from './components/Register'
+import { LandingPage } from './components/LandingPage'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import './App.css'
 
@@ -34,6 +35,14 @@ function AppContent() {
   const [quotes, setQuotes] = useState<SavedQuote[]>([])
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
+  const [showLanding, setShowLanding] = useState(!currentUser)
+
+  // Atualiza showLanding quando o estado de autenticação mudar
+  useEffect(() => {
+    if (!currentUser) {
+      setShowLanding(true);
+    }
+  }, [currentUser]);
 
   // Sincronizar quotes do Firebase com o estado local
   useEffect(() => {
@@ -101,8 +110,23 @@ function AppContent() {
     }
   }
 
-  // Se não estiver autenticado, mostrar tela de login/registro
+  // Se não estiver autenticado, mostrar landing page ou login/registro
   if (!currentUser) {
+    if (showLanding) {
+      return (
+        <LandingPage 
+          onLogin={() => {
+            setShowLanding(false);
+            setAuthMode('login');
+          }}
+          onRegister={() => {
+            setShowLanding(false);
+            setAuthMode('register');
+          }}
+        />
+      );
+    }
+    
     if (authMode === 'login') {
       return <Login onSwitchToRegister={() => setAuthMode('register')} />
     } else {
