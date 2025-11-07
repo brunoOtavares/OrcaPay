@@ -5,8 +5,8 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 120px);
-  overflow: hidden;
+  min-height: calc(100vh - 120px);
+  overflow: visible;
 }
 
 .header {
@@ -28,13 +28,19 @@
   grid-template-columns: 1fr 1fr;
   gap: var(--spacing-lg);
   flex: 1;
-  overflow: hidden;
+  overflow: visible;
   align-items: start;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .mainGrid {
     grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+  
+  .section {
+    height: auto;
+    min-height: 300px;
   }
 }
 
@@ -224,6 +230,13 @@
 
 .input::placeholder {
   color: var(--text-muted);
+}
+
+.input[type="text"],
+.input option,
+select.input option {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .button {
@@ -429,6 +442,34 @@
   font-weight: 400;
 }
 
+.removeButton {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  margin-left: var(--spacing-sm);
+  line-height: 1;
+}
+
+.removeButton:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  transform: scale(1.1);
+}
+
+.removeButton:active {
+  transform: scale(0.95);
+}
+
 @keyframes slideIn {
   from {
     opacity: 0;
@@ -449,5 +490,51 @@
   }
   60% {
     transform: translateY(-5px);
+  }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .section {
+    padding: var(--spacing-md);
+  }
+  
+  .sectionTitle {
+    font-size: 1rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+  
+  .inputGroup {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-xs);
+  }
+  
+  .salaryInputsInline {
+    flex-direction: column;
+    width: 100%;
+    margin-left: 0;
+    gap: var(--spacing-xs);
+  }
+  
+  .inputInline {
+    width: 100%;
+  }
+  
+  .workingHoursGroup {
+    grid-template-columns: 1fr;
+  }
+  
+  .results {
+    padding: var(--spacing-md);
+  }
+  
+  .results h2 {
+    font-size: 1.2rem;
   }
 }

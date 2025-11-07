@@ -5,6 +5,10 @@ import { Header } from './components/Header'
 import { Clients } from './components/Clients'
 import { Profile } from './components/Profile'
 import { MakeQuote } from './components/MakeQuote'
+import { Settings } from './components/Settings'
+import Login from './components/Login'
+import Register from './components/Register'
+import { AuthProvider, useAuth } from './contexts/AuthContext'
 import './App.css'
 
 export interface SavedQuote {
@@ -20,35 +24,90 @@ export interface SavedQuote {
   commercialUse: string;
   revisions: number;
   createdAt: string;
+  completed?: boolean;
+  completedAt?: string;
 }
 
-function App() {
+function AppContent() {
+  const { currentUser, userProfile, refreshUserProfile } = useAuth();
   const [activeTab, setActiveTab] = useState('calc-hour')
   const [quotes, setQuotes] = useState<SavedQuote[]>([])
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
 
+  // Sincronizar quotes do Firebase com o estado local
   useEffect(() => {
-    const savedQuotes = localStorage.getItem('orcapay_quotes')
-    if (savedQuotes) {
-      setQuotes(JSON.parse(savedQuotes))
+    if (userProfile) {
+      setQuotes(userProfile.quotes || [])
     }
-  }, [])
+  }, [userProfile])
 
-  const handleSaveQuote = (quote: Omit<SavedQuote, 'id' | 'createdAt'>) => {
+  const handleSaveQuote = async (quote: Omit<SavedQuote, 'id' | 'createdAt'>) => {
     const newQuote: SavedQuote = {
       ...quote,
       id: Date.now().toString(),
       createdAt: new Date().toISOString()
     }
+    
+    // Atualizar localmente primeiro para feedback imediato
     const updatedQuotes = [...quotes, newQuote]
     setQuotes(updatedQuotes)
-    localStorage.setItem('orcapay_quotes', JSON.stringify(updatedQuotes))
+    
+    // Salvar no Firebase
+    if (currentUser) {
+      try {
+        const { saveQuote } = await import('./services/firestoreService')
+        await saveQuote(currentUser.uid, newQuote)
+        await refreshUserProfile()
+      } catch (error) {
+        console.error('Erro ao salvar orçamento:', error)
+      }
+    }
+    
     setActiveTab('clients')
   }
 
-  const handleDeleteQuote = (id: string) => {
+  const handleDeleteQuote = async (id: string) => {
+    // Atualizar localmente primeiro
     const updatedQuotes = quotes.filter(q => q.id !== id)
     setQuotes(updatedQuotes)
-    localStorage.setItem('orcapay_quotes', JSON.stringify(updatedQuotes))
+    
+    // Deletar no Firebase
+    if (currentUser) {
+      try {
+        const { deleteQuote } = await import('./services/firestoreService')
+        await deleteQuote(currentUser.uid, id)
+        await refreshUserProfile()
+      } catch (error) {
+        console.error('Erro ao deletar orçamento:', error)
+      }
+    }
+  }
+
+  const handleUpdateQuote = async (id: string, updatedQuote: SavedQuote) => {
+    // Atualizar localmente primeiro
+    const updatedQuotes = quotes.map(q => q.id === id ? updatedQuote : q)
+    setQuotes(updatedQuotes)
+    
+    // Atualizar no Firebase
+    if (currentUser) {
+      try {
+        const { updateQuote } = await import('./services/firestoreService')
+        await updateQuote(currentUser.uid, id, updatedQuote)
+        await refreshUserProfile()
+      } catch (error) {
+        console.error('Erro ao atualizar orçamento:', error)
+      }
+    }
+  }
+
+  // Se não estiver autenticado, mostrar tela de login/registro
+  if (!currentUser) {
+    if (authMode === 'login') {
+      return <Login onSwitchToRegister={() => setAuthMode('register')} />
+    } else {
+      return <Register onSwitchToLogin={() => setAuthMode('login')} />
+    }
   }
 
   const renderContent = () => {
@@ -58,9 +117,11 @@ function App() {
       case 'budget':
         return <MakeQuote onSaveQuote={handleSaveQuote} />
       case 'clients':
-        return <Clients quotes={quotes} onDeleteQuote={handleDeleteQuote} />
+        return <Clients quotes={quotes} onDeleteQuote={handleDeleteQuote} onUpdateQuote={handleUpdateQuote} />
       case 'profile':
         return <Profile />
+      case 'settings':
+        return <Settings />
       default:
         return <BudgetCalculator />
     }
@@ -68,7 +129,35 @@ function App() {
 
   return (
     <div className="app">
-      <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
+      {/* Menu Hamburguer para Mobile */}
+      <button 
+        className="mobile-menu-btn"
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        aria-label="Toggle menu"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+
+      {/* Overlay para fechar sidebar no mobile */}
+      {sidebarOpen && (
+        <div 
+          className="sidebar-overlay" 
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      <Sidebar 
+        activeTab={activeTab} 
+        onTabChange={(tab) => {
+          setActiveTab(tab)
+          setSidebarOpen(false)
+        }} 
+        isOpen={sidebarOpen}
+      />
       <div className="main-content">
         <Header activeTab={activeTab} />
         <div className="content-wrapper">
@@ -76,6 +165,15 @@ function App() {
         </div>
       </div>
     </div>
+  )
+}
+
+// Wrapper principal com AuthProvider
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   )
 }
 

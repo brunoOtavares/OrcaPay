@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import styles from './BudgetCalculator.module.css';
+import { useAuth } from '../contexts/AuthContext';
+import { updateHourlyRate as updateFirebaseHourlyRate, updateCalculatorData } from '../services/firestoreService';
 
 interface Cost {
   description: string;
@@ -27,14 +29,13 @@ const parseCurrencyInput = (value: string): number => {
   return Number(value.replace(/\D/g, '')) / 100;
 };
 
-const STORAGE_KEY = 'orcapay_calculator_data';
-
 export function BudgetCalculator() {
-  // Carrega dados do Local Storage ou usa valores padrão
+  const { currentUser, userProfile } = useAuth();
+  
+  // Carrega dados do Firebase ou usa valores padrão
   const loadInitialData = (): CalculatorData => {
-    const savedData = localStorage.getItem(STORAGE_KEY);
-    if (savedData) {
-      return JSON.parse(savedData);
+    if (userProfile?.calculatorData) {
+      return userProfile.calculatorData;
     }
     return {
       fixedCosts: [],
@@ -77,6 +78,14 @@ export function BudgetCalculator() {
     }
   };
 
+  const removeFixedCost = (index: number) => {
+    setFixedCosts(fixedCosts.filter((_, i) => i !== index));
+  };
+
+  const removeVariableCost = (index: number) => {
+    setVariableCosts(variableCosts.filter((_, i) => i !== index));
+  };
+
   const calculateAverageSalary = () => {
     if (salary1 > 0 && salary2 > 0) {
       return (salary1 + salary2) / 2;
@@ -102,10 +111,24 @@ export function BudgetCalculator() {
     return hourlyRate;
   };
 
-  // Salva dados no Local Storage quando houver mudanças
+  // Atualizar dados quando userProfile mudar
   useEffect(() => {
+    if (userProfile?.calculatorData) {
+      setFixedCosts(userProfile.calculatorData.fixedCosts);
+      setVariableCosts(userProfile.calculatorData.variableCosts);
+      setHoursPerDay(userProfile.calculatorData.hoursPerDay);
+      setDaysPerMonth(userProfile.calculatorData.daysPerMonth);
+      setSalary1(userProfile.calculatorData.salary1 || 0);
+      setSalary2(userProfile.calculatorData.salary2 || 0);
+    }
+  }, [userProfile]);
+
+  // Salva dados no Firebase quando houver mudanças
+  useEffect(() => {
+    if (!currentUser) return;
+
     const averageSalary = calculateAverageSalary();
-    const data: CalculatorData = {
+    const data = {
       fixedCosts,
       variableCosts,
       salary1,
@@ -114,20 +137,26 @@ export function BudgetCalculator() {
       hoursPerDay,
       daysPerMonth
     };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 
-    // Salva o valor/hora calculado separadamente
+    // Salvar dados da calculadora no Firebase
+    updateCalculatorData(currentUser.uid, data).catch(err => {
+      console.error('Erro ao salvar dados da calculadora:', err);
+    });
+
+    // Salvar valor/hora
     const hourlyRate = calculateHourlyRate();
     if (hourlyRate > 0) {
-      localStorage.setItem('orcapay_hourly_rate', hourlyRate.toString());
+      updateFirebaseHourlyRate(currentUser.uid, hourlyRate).catch(err => {
+        console.error('Erro ao salvar valor/hora no Firebase:', err);
+      });
+      
       // Dispara evento customizado para atualizar outros componentes
       window.dispatchEvent(new CustomEvent('hourlyRateUpdated', { detail: { hourlyRate } }));
     } else {
-      localStorage.removeItem('orcapay_hourly_rate');
       // Dispara evento customizado para atualizar outros componentes
       window.dispatchEvent(new CustomEvent('hourlyRateUpdated', { detail: { hourlyRate: null } }));
     }
-  }, [fixedCosts, variableCosts, salary1, salary2, hoursPerDay, daysPerMonth]);
+  }, [fixedCosts, variableCosts, salary1, salary2, hoursPerDay, daysPerMonth, currentUser]);
 
   return (
     <div className={styles.budgetCalculator}>
@@ -175,6 +204,13 @@ export function BudgetCalculator() {
               <div key={index} className={styles.costItem}>
                 <span>{cost.description}</span>
                 <span>{formatCurrency(cost.value)}</span>
+                <button 
+                  className={styles.removeButton}
+                  onClick={() => removeFixedCost(index)}
+                  title="Remover"
+                >
+                  ×
+                </button>
               </div>
             ))}
           </div>
@@ -213,6 +249,13 @@ export function BudgetCalculator() {
               <div key={index} className={styles.costItem}>
                 <span>{cost.description}</span>
                 <span>{formatCurrency(cost.value)}</span>
+                <button 
+                  className={styles.removeButton}
+                  onClick={() => removeVariableCost(index)}
+                  title="Remover"
+                >
+                  ×
+                </button>
               </div>
             ))}
           </div>

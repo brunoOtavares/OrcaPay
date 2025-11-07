@@ -1,5 +1,14 @@
 import { useState, useEffect } from 'react';
 import styles from './MakeQuote.module.css';
+import { useAuth } from '../contexts/AuthContext';
+import { DEFAULT_SETTINGS } from '../utils/settings';
+
+const parseCurrencyInput = (value: string): number => {
+  // Remove tudo exceto números
+  const numericValue = value.replace(/\D/g, '');
+  // Divide por 100 para obter o valor com centavos
+  return Number(numericValue) / 100;
+};
 
 interface ProjectDetails {
   clientName: string;
@@ -11,8 +20,7 @@ interface ProjectDetails {
 interface TimeFactors {
   research: number;
   creation: number;
-  presentation: number;
-  delivery: number;
+  meetings: number;
 }
 
 interface PriceModifiers {
@@ -38,7 +46,7 @@ interface MakeQuoteProps {
 }
 
 export function MakeQuote({ onSaveQuote }: MakeQuoteProps) {
-  const [hasHourlyRate, setHasHourlyRate] = useState(false);
+  const { userProfile } = useAuth();
   const [hourlyRate, setHourlyRate] = useState<number>(0);
   const [totalHours, setTotalHours] = useState<number>(0);
   const [projectDetails, setProjectDetails] = useState<ProjectDetails>({
@@ -50,8 +58,7 @@ export function MakeQuote({ onSaveQuote }: MakeQuoteProps) {
   const [timeFactors, setTimeFactors] = useState<TimeFactors>({
     research: 0,
     creation: 0,
-    presentation: 0,
-    delivery: 0
+    meetings: 0
   });
   const [priceModifiers, setPriceModifiers] = useState<PriceModifiers>({
     complexity: 'media',
@@ -60,21 +67,28 @@ export function MakeQuote({ onSaveQuote }: MakeQuoteProps) {
     revisions: 2
   });
   const [finalPrice, setFinalPrice] = useState<number>(0);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [hasHourlyRate, setHasHourlyRate] = useState(false);
+  const [confirmFinalPrice, setConfirmFinalPrice] = useState<string>('');
 
   useEffect(() => {
-    // Check if hourly rate exists in localStorage
-    const savedHourlyRate = localStorage.getItem('orcapay_hourly_rate');
-    setHasHourlyRate(!!savedHourlyRate);
-    if (savedHourlyRate) {
-      setHourlyRate(parseFloat(savedHourlyRate));
+    // Buscar hourlyRate do Firebase
+    if (userProfile?.hourlyRate) {
+      setHourlyRate(userProfile.hourlyRate);
+      setHasHourlyRate(true);
     }
+  }, [userProfile]);
 
-    // Listen for custom hourly rate update events
-    const handleHourlyRateUpdate = () => {
-      const updatedHourlyRate = localStorage.getItem('orcapay_hourly_rate');
-      setHasHourlyRate(!!updatedHourlyRate);
+  useEffect(() => {
+    // Listener para atualização do valor/hora
+    const handleHourlyRateUpdate = (event: any) => {
+      const updatedHourlyRate = event.detail.hourlyRate;
       if (updatedHourlyRate) {
         setHourlyRate(parseFloat(updatedHourlyRate));
+        setHasHourlyRate(true);
+      } else {
+        setHourlyRate(0);
+        setHasHourlyRate(false);
       }
     };
 
@@ -86,29 +100,29 @@ export function MakeQuote({ onSaveQuote }: MakeQuoteProps) {
   }, []);
 
   useEffect(() => {
-    const total = timeFactors.research + timeFactors.creation + timeFactors.presentation + timeFactors.delivery;
+    const total = timeFactors.research + timeFactors.creation + timeFactors.meetings;
     setTotalHours(total);
     calculateFinalPrice();
   }, [timeFactors, priceModifiers, hourlyRate]);
 
   const calculateFinalPrice = () => {
-    const totalHours = timeFactors.research + timeFactors.creation + timeFactors.presentation + timeFactors.delivery;
+    const totalHours = timeFactors.research + timeFactors.creation + timeFactors.meetings;
+    
+    // Carrega configurações do Firebase ou usa padrão
+    const settings = userProfile?.settings || DEFAULT_SETTINGS;
     
     // Define o multiplicador de lucro baseado na complexidade
-    let profitMargin = 2.0; // Padrão para complexidade média
-    if (priceModifiers.complexity === 'baixa') profitMargin = 1.5; // 50% de lucro
-    if (priceModifiers.complexity === 'alta') profitMargin = 2.5; // 150% de lucro
+    let profitMargin = settings.complexityMultipliers[priceModifiers.complexity];
     
     // Calcula preço base
     let calculatedPrice = totalHours * hourlyRate * profitMargin;
     
     // Ajusta preço baseado no uso comercial
-    if (priceModifiers.commercialUse === 'regional') calculatedPrice *= 1.2;
-    if (priceModifiers.commercialUse === 'nacional') calculatedPrice *= 1.5;
+    calculatedPrice *= settings.commercialUseMultipliers[priceModifiers.commercialUse];
     
     // Adiciona taxa de urgência se necessário
     if (priceModifiers.urgency) {
-      calculatedPrice *= 1.3; // 30% extra para urgência
+      calculatedPrice *= settings.urgencyMultiplier;
     }
     
     setFinalPrice(calculatedPrice);
@@ -121,7 +135,7 @@ export function MakeQuote({ onSaveQuote }: MakeQuoteProps) {
     });
   };
 
-  const handleConfirmQuote = () => {
+  const handleOpenConfirmModal = () => {
     if (!projectDetails.clientName || !projectDetails.projectType) {
       alert('Por favor, preencha o nome do cliente e o tipo de projeto.');
       return;
@@ -132,20 +146,34 @@ export function MakeQuote({ onSaveQuote }: MakeQuoteProps) {
       return;
     }
 
+    // Define o preço inicial como o preço calculado formatado em BRL
+    setConfirmFinalPrice(formatCurrency(finalPrice));
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmQuote = () => {
+    const priceToSave = parseCurrencyInput(confirmFinalPrice);
+    
+    if (isNaN(priceToSave) || priceToSave <= 0) {
+      alert('Por favor, insira um preço válido.');
+      return;
+    }
+
     onSaveQuote({
       clientName: projectDetails.clientName,
       projectType: projectDetails.projectType,
       description: projectDetails.description,
       deliveryDate: projectDetails.deliveryDate,
       totalHours,
-      finalPrice,
+      finalPrice: priceToSave,
       complexity: priceModifiers.complexity,
       urgency: priceModifiers.urgency,
       commercialUse: priceModifiers.commercialUse,
       revisions: priceModifiers.revisions
     });
 
-    // Limpar formulário
+    // Fechar modal e limpar formulário
+    setShowConfirmModal(false);
     setProjectDetails({
       clientName: '',
       projectType: '',
@@ -155,8 +183,7 @@ export function MakeQuote({ onSaveQuote }: MakeQuoteProps) {
     setTimeFactors({
       research: 0,
       creation: 0,
-      presentation: 0,
-      delivery: 0
+      meetings: 0
     });
     setPriceModifiers({
       complexity: 'media',
@@ -170,7 +197,7 @@ export function MakeQuote({ onSaveQuote }: MakeQuoteProps) {
     return (
       <div className={styles.container}>
         <div className={styles.messageBox}>
-          <h2>⚠️ Atenção</h2>
+          <h2>Atenção</h2>
           <p>Primeiro calcule seu Valor/Hora na aba "Calcular Hora de Trabalho"</p>
           <p>Isso é necessário para fazer orçamentos precisos dos seus projetos.</p>
         </div>
@@ -258,24 +285,13 @@ export function MakeQuote({ onSaveQuote }: MakeQuoteProps) {
                 </div>
                 
                 <div className={styles.timeFactor}>
-                  <label>Apresentação:</label>
+                  <label>Reuniões:</label>
                   <input
                     type="number"
                     min="0"
                     step="0.5"
-                    value={timeFactors.presentation || ''}
-                    onChange={(e) => setTimeFactors({...timeFactors, presentation: e.target.value === '' ? 0 : parseFloat(e.target.value)})}
-                  />
-                </div>
-                
-                <div className={styles.timeFactor}>
-                  <label>Entrega:</label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.5"
-                    value={timeFactors.delivery || ''}
-                    onChange={(e) => setTimeFactors({...timeFactors, delivery: e.target.value === '' ? 0 : parseFloat(e.target.value)})}
+                    value={timeFactors.meetings || ''}
+                    onChange={(e) => setTimeFactors({...timeFactors, meetings: e.target.value === '' ? 0 : parseFloat(e.target.value)})}
                   />
                 </div>
               </div>
@@ -349,12 +365,23 @@ export function MakeQuote({ onSaveQuote }: MakeQuoteProps) {
               <div className={styles.formula}>
                 <p>Cálculo: (Total Horas × Valor/Hora × Multiplicador) + Ajustes</p>
                 <small>
-                  {priceModifiers.complexity === 'baixa' && 'Multiplicador: 1.5x (50% de lucro)'}
-                  {priceModifiers.complexity === 'media' && 'Multiplicador: 2.0x (100% de lucro)'}
-                  {priceModifiers.complexity === 'alta' && 'Multiplicador: 2.5x (150% de lucro)'}
-                  {priceModifiers.urgency && ' • Urgência: +30%'}
-                  {priceModifiers.commercialUse === 'regional' && ' • Uso Regional: +20%'}
-                  {priceModifiers.commercialUse === 'nacional' && ' • Uso Nacional: +50%'}
+                  {(() => {
+                    const settings = userProfile?.settings || DEFAULT_SETTINGS;
+                    const complexityMult = settings.complexityMultipliers[priceModifiers.complexity];
+                    const complexityProfit = ((complexityMult - 1) * 100).toFixed(0);
+                    const commercialMult = settings.commercialUseMultipliers[priceModifiers.commercialUse];
+                    const commercialExtra = ((commercialMult - 1) * 100).toFixed(0);
+                    const urgencyExtra = ((settings.urgencyMultiplier - 1) * 100).toFixed(0);
+                    
+                    return (
+                      <>
+                        Multiplicador: {complexityMult}x ({complexityProfit}% de lucro)
+                        {priceModifiers.urgency && ` • Urgência: +${urgencyExtra}%`}
+                        {priceModifiers.commercialUse === 'regional' && ` • Uso Regional: +${commercialExtra}%`}
+                        {priceModifiers.commercialUse === 'nacional' && ` • Uso Nacional: +${commercialExtra}%`}
+                      </>
+                    );
+                  })()}
                 </small>
               </div>
               
@@ -363,20 +390,103 @@ export function MakeQuote({ onSaveQuote }: MakeQuoteProps) {
                 <div className={styles.priceRange}>
                   <span className={styles.priceMin}>{formatCurrency(finalPrice)}</span>
                   <span className={styles.priceSeparator}>até</span>
-                  <span className={styles.priceMax}>{formatCurrency(finalPrice * 1.3)}</span>
+                  <span className={styles.priceMax}>{formatCurrency(finalPrice * (1 + (userProfile?.settings || DEFAULT_SETTINGS).priceRangePercentage / 100))}</span>
                 </div>
               </div>
 
               <button 
                 className={styles.confirmButton}
-                onClick={handleConfirmQuote}
+                onClick={handleOpenConfirmModal}
               >
-                ✓ Confirmar e Enviar para Clientes
+                Confirmar e Enviar para Clientes
               </button>
             </section>
           </div>
         </div>
       </div>
+
+      {/* Modal de Confirmação */}
+      {showConfirmModal && (
+        <div className={styles.modalOverlay} onClick={() => setShowConfirmModal(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <h2>Confirmar Orçamento</h2>
+            
+            <div className={styles.modalInfo}>
+              <div className={styles.infoRow}>
+                <span className={styles.label}>Cliente:</span>
+                <span className={styles.value}>{projectDetails.clientName}</span>
+              </div>
+              
+              <div className={styles.infoRow}>
+                <span className={styles.label}>Projeto:</span>
+                <span className={styles.value}>{projectDetails.projectType}</span>
+              </div>
+              
+              {projectDetails.description && (
+                <div className={styles.infoRow}>
+                  <span className={styles.label}>Descrição:</span>
+                  <span className={styles.value}>{projectDetails.description}</span>
+                </div>
+              )}
+              
+              {projectDetails.deliveryDate && (
+                <div className={styles.infoRow}>
+                  <span className={styles.label}>Data de Entrega:</span>
+                  <span className={styles.value}>
+                    {new Date(projectDetails.deliveryDate + 'T00:00:00').toLocaleDateString('pt-BR')}
+                  </span>
+                </div>
+              )}
+              
+              <div className={styles.infoRow}>
+                <span className={styles.label}>Total de Horas:</span>
+                <span className={styles.value}>{totalHours}h</span>
+              </div>
+              
+              <div className={styles.infoRow}>
+                <span className={styles.label}>Preço Sugerido:</span>
+                <span className={styles.value}>
+                  {formatCurrency(finalPrice)} até {formatCurrency(finalPrice * 1.3)}
+                </span>
+              </div>
+            </div>
+            
+            <div className={styles.modalPriceInput}>
+              <label>Preço Final:</label>
+              <input
+                type="text"
+                value={confirmFinalPrice}
+                onChange={(e) => {
+                  const rawValue = e.target.value.replace(/\D/g, '');
+                  if (rawValue === '') {
+                    setConfirmFinalPrice('');
+                  } else {
+                    const numberValue = parseFloat(rawValue) / 100;
+                    setConfirmFinalPrice(formatCurrency(numberValue));
+                  }
+                }}
+                placeholder="R$ 0,00"
+                autoFocus
+              />
+            </div>
+            
+            <div className={styles.modalActions}>
+              <button 
+                className={styles.cancelButton}
+                onClick={() => setShowConfirmModal(false)}
+              >
+                Cancelar
+              </button>
+              <button 
+                className={styles.confirmModalButton}
+                onClick={handleConfirmQuote}
+              >
+                Confirmar Orçamento
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

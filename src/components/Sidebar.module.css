@@ -42,11 +42,6 @@
   gap: var(--spacing-sm);
 }
 
-.logo h1::before {
-  content: '💰';
-  font-size: 2rem;
-}
-
 .navigation {
   flex: 1;
   display: flex;
@@ -139,6 +134,74 @@
   text-align: left;
 }
 
+.bottomButtons {
+  padding: 0 var(--spacing-md);
+  margin-top: auto;
+  padding-top: var(--spacing-xl);
+  position: relative;
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.bottomButtons::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: var(--spacing-xl);
+  right: var(--spacing-xl);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+}
+
+.configBtn {
+  padding: var(--spacing-md);
+  background: var(--surface-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+}
+
+.configBtn:hover {
+  background: var(--surface-hover);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+  transform: scale(1.05);
+}
+
+.configBtn svg {
+  transition: transform var(--transition-normal);
+}
+
+.configBtn:hover svg {
+  transform: rotate(45deg);
+}
+
+.layoutBtn {
+  flex: 1;
+  padding: var(--spacing-md);
+  background: var(--surface-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+}
+
+/* Mantém compatibilidade com .layoutButton antigo */
 .layoutButton {
   padding: 0 var(--spacing-md);
   margin-top: auto;
@@ -156,23 +219,6 @@
   background: linear-gradient(90deg, transparent, var(--border-color), transparent);
 }
 
-.layoutBtn {
-  width: 100%;
-  padding: var(--spacing-md);
-  background: var(--surface-input);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition-normal);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-sm);
-}
-
 .layoutBtn:hover {
   background: var(--surface-hover);
   color: var(--text-primary);
@@ -187,73 +233,38 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .sidebar {
-    width: 80px;
-  }
-  
-  .logo {
-    padding: 0 var(--spacing-md) var(--spacing-md);
-  }
-  
-  .logo::after {
-    left: var(--spacing-md);
-    right: var(--spacing-md);
-  }
-  
-  .logo h1 {
-    font-size: 1.5rem;
-    justify-content: center;
-  }
-  
-  .logo h1::before {
-    font-size: 1.75rem;
-  }
-  
-  .navigation {
-    padding: 0 var(--spacing-sm);
-  }
-  
-  .navItem {
-    padding: var(--spacing-md);
-    justify-content: center;
-  }
-  
-  .navItem .label {
-    display: none;
-  }
-  
-  .navItem::before {
-    display: none;
-  }
-  
-  .layoutButton {
-    padding: 0 var(--spacing-sm);
-  }
-  
-  .layoutButton::before {
-    left: var(--spacing-sm);
-    right: var(--spacing-sm);
-  }
-  
-  .layoutBtn {
-    padding: var(--spacing-md);
-    font-size: 0;
-  }
-  
-  .layoutBtn::after {
-    content: '⚙️';
-    font-size: 1.25rem;
+    width: 240px;
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 280px;
+    height: 100vh;
     transform: translateX(-100%);
     transition: transform var(--transition-normal);
+    z-index: 1000;
   }
   
   .sidebar.open {
     transform: translateX(0);
+    box-shadow: var(--shadow-xl);
+  }
+  
+  .logo h1 {
+    font-size: 1.5rem;
+  }
+  
+  .navigation {
+    padding: 0 var(--spacing-md);
+  }
+  
+  .bottomButtons {
+    padding: 0 var(--spacing-md);
   }
 }
