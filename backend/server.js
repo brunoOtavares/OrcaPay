@@ -3,8 +3,22 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
 import crypto from 'crypto';
+import admin from 'firebase-admin';
 
 dotenv.config();
+
+// Inicializar Firebase Admin (usando variáveis de ambiente)
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert({
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    }),
+  });
+}
+
+const db = admin.firestore();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -64,6 +78,46 @@ app.get('/', (req, res) => {
     message: 'Backend CálculoCerto rodando!',
     timestamp: new Date().toISOString()
   });
+});
+
+// Rota para ativar assinatura manualmente (TEMPORÁRIA - para corrigir pagamentos já feitos)
+app.post('/api/activate-subscription', async (req, res) => {
+  try {
+    const { userId, planId, paymentId } = req.body;
+
+    if (!userId || !planId) {
+      return res.status(400).json({ error: 'userId e planId são obrigatórios' });
+    }
+
+    const startDate = new Date();
+    const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 dias
+
+    await db.collection('users').doc(userId).set({
+      subscription: {
+        plan: planId,
+        status: 'active',
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        mercadoPagoPaymentId: paymentId || 'manual_activation',
+      }
+    }, { merge: true });
+
+    console.log(`✅ Assinatura ${planId} ativada manualmente para usuário ${userId}`);
+    
+    res.json({ 
+      success: true, 
+      message: 'Assinatura ativada com sucesso!',
+      subscription: {
+        plan: planId,
+        status: 'active',
+        endDate: endDate.toISOString()
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Erro ao ativar assinatura:', error);
+    res.status(500).json({ error: 'Erro ao ativar assinatura' });
+  }
 });
 
 // Criar preferência de pagamento
@@ -181,18 +235,25 @@ app.post('/webhook', async (req, res) => {
 
         console.log(`✅ Pagamento aprovado! Ativando plano ${planId} para usuário ${userId}`);
 
-        // Aqui você integraria com Firebase para atualizar a assinatura
-        // Por enquanto, apenas log
-        console.log('TODO: Atualizar Firebase com assinatura ativa');
-        
-        // Exemplo de como seria:
-        // await updateUserSubscription(userId, {
-        //   plan: planId,
-        //   status: 'active',
-        //   startDate: new Date().toISOString(),
-        //   endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        //   mercadoPagoPaymentId: paymentData.id,
-        // });
+        try {
+          // Atualizar Firebase com assinatura ativa
+          const startDate = new Date();
+          const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 dias
+
+          await db.collection('users').doc(userId).set({
+            subscription: {
+              plan: planId,
+              status: 'active',
+              startDate: startDate.toISOString(),
+              endDate: endDate.toISOString(),
+              mercadoPagoPaymentId: paymentData.id,
+            }
+          }, { merge: true });
+
+          console.log(`✅ Assinatura ${planId} ativada para usuário ${userId}`);
+        } catch (error) {
+          console.error('❌ Erro ao atualizar Firebase:', error);
+        }
       }
     }
 
