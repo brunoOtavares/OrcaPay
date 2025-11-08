@@ -5,7 +5,7 @@ import styles from './PaymentDiagnostic.module.css';
 
 export function PaymentDiagnostic() {
   const [configStatus, setConfigStatus] = useState<any>(null);
-  const [backendStatus, setBackendStatus] = useState<boolean | null>(null);
+  const [backendStatus, setBackendStatus] = useState<{ connected: boolean; error?: string; details?: any } | null>(null);
   const [sdkStatus, setSdkStatus] = useState<boolean | null>(null);
   const [isChecking, setIsChecking] = useState(false);
 
@@ -31,14 +31,16 @@ export function PaymentDiagnostic() {
     runDiagnostics();
   }, []);
 
-  const getStatusIcon = (status: boolean | null) => {
+  const getStatusIcon = (status: boolean | { connected: boolean } | null) => {
     if (status === null) return '⏳';
-    return status ? '✅' : '❌';
+    if (typeof status === 'boolean') return status ? '✅' : '❌';
+    return status.connected ? '✅' : '❌';
   };
 
-  const getStatusColor = (status: boolean | null) => {
+  const getStatusColor = (status: boolean | { connected: boolean } | null) => {
     if (status === null) return styles.pending;
-    return status ? styles.success : styles.error;
+    if (typeof status === 'boolean') return status ? styles.success : styles.error;
+    return status.connected ? styles.success : styles.error;
   };
 
   return (
@@ -84,17 +86,45 @@ export function PaymentDiagnostic() {
             <h3>Backend</h3>
           </div>
           <div className={styles.statusDetails}>
-            {backendStatus === true && (
-              <div className={styles.successItem}>
-                <span className={styles.successIcon}>✅</span>
-                <span>Backend está acessível</span>
-              </div>
+            {backendStatus?.connected === true && (
+              <>
+                <div className={styles.successItem}>
+                  <span className={styles.successIcon}>✅</span>
+                  <span>Backend está acessível</span>
+                </div>
+                {backendStatus.details?.responseTime && (
+                  <div className={styles.successItem}>
+                    <span className={styles.successIcon}>⚡</span>
+                    <span>Tempo de resposta: {backendStatus.details.responseTime}ms</span>
+                  </div>
+                )}
+                {backendStatus.details?.serverInfo && (
+                  <div className={styles.successItem}>
+                    <span className={styles.successIcon}>📊</span>
+                    <span>Servidor: {backendStatus.details.serverInfo.message}</span>
+                  </div>
+                )}
+              </>
             )}
-            {backendStatus === false && (
-              <div className={styles.errorItem}>
-                <span className={styles.errorIcon}>❌</span>
-                <span>Backend não está acessível</span>
-              </div>
+            {backendStatus?.connected === false && (
+              <>
+                <div className={styles.errorItem}>
+                  <span className={styles.errorIcon}>❌</span>
+                  <span>Backend não está acessível</span>
+                </div>
+                {backendStatus.error && (
+                  <div className={styles.errorItem}>
+                    <span className={styles.errorIcon}>🔍</span>
+                    <span>Erro: {backendStatus.error}</span>
+                  </div>
+                )}
+                {backendStatus.details?.backendUrl && (
+                  <div className={styles.errorItem}>
+                    <span className={styles.errorIcon}>🌐</span>
+                    <span>URL: {backendStatus.details.backendUrl}</span>
+                  </div>
+                )}
+              </>
             )}
             {backendStatus === null && (
               <div className={styles.pendingItem}>

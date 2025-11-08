@@ -110,28 +110,67 @@ export const logConfigStatus = (): void => {
 /**
  * Verifica se o backend está acessível
  */
-export const checkBackendConnection = async (): Promise<boolean> => {
+export const checkBackendConnection = async (): Promise<{ connected: boolean; error?: string; details?: any }> => {
   try {
     const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 segundos
+    console.log(`🔍 Verificando conexão com backend: ${backendUrl}`);
     
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos
+    
+    const startTime = Date.now();
     const response = await fetch(`${backendUrl}/`, {
       signal: controller.signal,
       method: 'GET'
     });
+    const responseTime = Date.now() - startTime;
     
     clearTimeout(timeoutId);
     
     if (response.ok) {
-      console.log('✅ Backend está acessível');
-      return true;
+      const data = await response.json();
+      console.log('✅ Backend está acessível:', data);
+      return {
+        connected: true,
+        details: {
+          responseTime,
+          status: response.status,
+          serverInfo: data
+        }
+      };
     } else {
       console.error(`❌ Backend retornou status ${response.status}`);
-      return false;
+      return {
+        connected: false,
+        error: `Backend retornou status ${response.status}`,
+        details: {
+          responseTime,
+          status: response.status,
+          statusText: response.statusText
+        }
+      };
     }
   } catch (error) {
     console.error('❌ Erro ao conectar ao backend:', error);
-    return false;
+    
+    let errorMessage = 'Erro desconhecido ao conectar ao backend';
+    if (error instanceof Error) {
+      if (error.name === 'AbortError') {
+        errorMessage = 'Timeout ao conectar ao backend (10s)';
+      } else if (error.message.includes('fetch')) {
+        errorMessage = 'Erro de rede ao conectar ao backend';
+      } else {
+        errorMessage = error.message;
+      }
+    }
+    
+    return {
+      connected: false,
+      error: errorMessage,
+      details: {
+        backendUrl: import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001',
+        errorType: error instanceof Error ? error.name : 'unknown'
+      }
+    };
   }
 };

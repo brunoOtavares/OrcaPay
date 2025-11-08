@@ -115,18 +115,30 @@ export function SubscriptionManager() {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 segundos
       
-      const response = await fetch(`${backendUrl}/api/create-preference`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          planId: selectedPlan,
-          userId: currentUser.uid,
-          userEmail: currentUser.email,
-        }),
-        signal: controller.signal
-      });
+      let response;
+      try {
+        response = await fetch(`${backendUrl}/api/create-preference`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            planId: selectedPlan,
+            userId: currentUser.uid,
+            userEmail: currentUser.email,
+          }),
+          signal: controller.signal
+        });
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        console.error('Erro na requisição:', fetchError);
+        
+        if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+          throw new Error(`O backend está demorando para responder. Verifique se o servidor está online em ${backendUrl}`);
+        } else {
+          throw new Error(`Não foi possível conectar ao backend em ${backendUrl}. Verifique se o servidor está online.`);
+        }
+      }
 
       clearTimeout(timeoutId);
       console.log('Resposta do backend:', response.status, response.statusText);
@@ -134,7 +146,16 @@ export function SubscriptionManager() {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         console.error('Erro na resposta do backend:', errorData);
-        throw new Error(errorData.error || `Erro ao criar pagamento (${response.status})`);
+        
+        if (response.status === 0) {
+          throw new Error(`Não foi possível conectar ao backend. Verifique se o servidor está online em ${backendUrl}`);
+        } else if (response.status >= 500) {
+          throw new Error(`Erro interno do servidor (${response.status}). Tente novamente em alguns minutos.`);
+        } else if (response.status === 404) {
+          throw new Error(`Endpoint não encontrado (${response.status}). Verifique se o backend está atualizado.`);
+        } else {
+          throw new Error(errorData.error || `Erro ao criar pagamento (${response.status})`);
+        }
       }
 
       const data = await response.json();
