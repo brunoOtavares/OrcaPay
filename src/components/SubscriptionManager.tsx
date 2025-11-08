@@ -169,6 +169,7 @@ export function SubscriptionManager() {
       // Abrir checkout do Mercado Pago em modal/popup
       console.log('Abrindo checkout do Mercado Pago...');
       
+<<<<<<< HEAD
       // Flag para evitar mostrar erro se o modal abrir com sucesso
       let checkoutOpened = false;
       let checkoutTimeout: number;
@@ -203,9 +204,34 @@ export function SubscriptionManager() {
         checkout.on('close', () => {
           console.log('Modal fechado');
           setLoading(false);
-          refreshUserProfile();
-        });
+=======
+      const checkout = mp.checkout({
+        preference: {
+          id: data.preferenceId
+        },
+        autoOpen: true, // Abre automaticamente
+      });
 
+      // Callbacks do checkout
+      checkout.on('close', () => {
+        console.log('Modal fechado');
+        setLoading(false);
+        // Recarrega o perfil para verificar se o pagamento foi aprovado
+        refreshUserProfile();
+      });
+
+      checkout.on('payment', (result: any) => {
+        console.log('Pagamento realizado:', result);
+        setLoading(false);
+        // Aguarda um pouco para o webhook processar
+        setTimeout(() => {
+>>>>>>> parent of e3b52d4 (fix: prevent error alert from showing when checkout opens successfully)
+          refreshUserProfile();
+          alert('Pagamento realizado! Aguarde alguns segundos para ver sua assinatura ativada.');
+        }, 2000);
+      });
+
+<<<<<<< HEAD
         checkout.on('payment', (result: any) => {
           console.log('Pagamento realizado:', result);
           setLoading(false);
@@ -227,9 +253,16 @@ export function SubscriptionManager() {
           alert('Erro ao abrir checkout. Tente novamente.');
         }
       }
+=======
+      checkout.on('error', (error: any) => {
+        console.error('Erro no checkout:', error);
+        setLoading(false);
+        alert('Erro ao processar pagamento. Tente novamente.');
+      });
+>>>>>>> parent of e3b52d4 (fix: prevent error alert from showing when checkout opens successfully)
 
     } catch (error) {
-      console.error('Erro ao criar preferência de pagamento:', error);
+      console.error('Erro ao processar pagamento:', error);
       setLoading(false);
       
       let errorMessage = 'Erro ao criar pagamento. Verifique sua conexão e tente novamente.';
