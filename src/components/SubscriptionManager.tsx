@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { updateSubscription } from '../services/firestoreService';
+import { updateSubscription, getUserProfile } from '../services/firestoreService';
 import { loadAndInitMercadoPago } from '../utils/mercadoPagoLoader';
 import { checkMercadoPagoConfig, checkBackendConnection } from '../utils/configChecker';
 import styles from './SubscriptionManager.module.css';
@@ -197,22 +197,25 @@ export function SubscriptionManager() {
 
         // Variável para controlar o polling
         let pollingInterval: number | null = null;
-        let modalClosed = false;
 
         // Função para verificar se o pagamento foi aprovado
         const checkPaymentStatus = async () => {
           try {
-            await refreshUserProfile();
+            console.log('🔍 Verificando status do pagamento...');
+            // Buscar perfil atualizado diretamente
+            if (!currentUser) return;
+            
+            const updatedProfile = await getUserProfile(currentUser.uid);
+            console.log('📊 Status da assinatura:', updatedProfile?.subscription?.status);
+            
             // Se a assinatura for ativada, fechar o modal e mostrar sucesso
-            if (userProfile?.subscription?.status === 'active') {
+            if (updatedProfile?.subscription?.status === 'active') {
               console.log('✅ Pagamento detectado! Assinatura ativada.');
               if (pollingInterval) clearInterval(pollingInterval);
               setLoading(false);
               alert('✅ Pagamento confirmado! Sua assinatura foi ativada com sucesso.');
-              // Forçar fechamento do modal se ainda estiver aberto
-              if (!modalClosed) {
-                window.location.reload(); // Recarrega para fechar o modal e atualizar interface
-              }
+              // Forçar fechamento do modal e reload
+              window.location.reload();
             }
           } catch (error) {
             console.error('Erro ao verificar status do pagamento:', error);
@@ -227,8 +230,7 @@ export function SubscriptionManager() {
         });
 
         checkout.on('close', () => {
-          console.log('Modal fechado');
-          modalClosed = true;
+          console.log('Modal fechado pelo usuário');
           if (pollingInterval) clearInterval(pollingInterval);
           setLoading(false);
           refreshUserProfile();
