@@ -184,10 +184,26 @@ export function PaymentDiagnostic() {
           <div className={styles.helpItem}>
             <h4>Backend Inacessível</h4>
             <p>Certifique-se de que o backend está rodando na porta correta (3001 por padrão)</p>
+            {backendStatus?.connected === false && (
+              <div className={styles.helpAction}>
+                <a href="/BACKEND_INACESSIVEL.md" target="_blank" rel="noopener noreferrer" className={styles.helpLink}>
+                  📖 Guia completo para resolver backend inacessível
+                </a>
+              </div>
+            )}
           </div>
           <div className={styles.helpItem}>
             <h4>SDK Não Carregado</h4>
             <p>Verifique sua conexão com a internet e se não há bloqueadores de scripts</p>
+          </div>
+          <div className={styles.helpItem}>
+            <h4>Erro no Checkout do Mercado Pago</h4>
+            <p>Se aparecer erro "X.checkout(...).then is not a function", a API mudou</p>
+            <div className={styles.helpAction}>
+              <a href="/ERRO_MERCADOPAGO_CHECKOUT.md" target="_blank" rel="noopener noreferrer" className={styles.helpLink}>
+                📖 Guia para corrigir erro de API do Mercado Pago
+              </a>
+            </div>
           </div>
         </div>
       </div>

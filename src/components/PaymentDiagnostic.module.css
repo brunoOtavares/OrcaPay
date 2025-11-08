@@ -181,6 +181,30 @@
   margin: 0;
 }
 
+.helpAction {
+  margin-top: 0.5rem;
+}
+
+.helpLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #007bff;
+  text-decoration: none;
+  font-size: 0.85rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  transition: all 0.2s ease;
+}
+
+.helpLink:hover {
+  background: #e9ecef;
+  color: #0056b3;
+  text-decoration: none;
+}
+
 @media (max-width: 768px) {
   .diagnosticContainer {
     padding: 1rem;

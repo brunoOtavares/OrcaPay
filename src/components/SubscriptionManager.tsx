@@ -181,12 +181,15 @@ export function SubscriptionManager() {
         }
       }, 15000); // 15 segundos
 
-      mp.checkout({
-        preference: {
-          id: data.preferenceId
-        },
-        autoOpen: true,
-      }).then((checkout: any) => {
+      // A API do Mercado Pago mudou - agora usamos o método direto
+      try {
+        const checkout = mp.checkout({
+          preference: {
+            id: data.preferenceId
+          },
+          autoOpen: true,
+        });
+        
         checkoutOpened = true;
         clearTimeout(checkoutTimeout);
         console.log('Checkout do Mercado Pago aberto com sucesso');
@@ -215,14 +218,14 @@ export function SubscriptionManager() {
           setLoading(false);
           alert('Erro ao processar pagamento. Tente novamente.');
         });
-      }).catch((error: any) => {
+      } catch (error) {
         console.error('Erro ao abrir checkout:', error);
         clearTimeout(checkoutTimeout);
         if (!checkoutOpened) {
           setLoading(false);
           alert('Erro ao abrir checkout. Tente novamente.');
         }
-      });
+      }
 
     } catch (error) {
       console.error('Erro ao criar preferência de pagamento:', error);

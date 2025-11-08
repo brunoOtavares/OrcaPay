@@ -71,6 +71,15 @@ npm start
 2. Confirme se o backend permite CORS da sua origem
 3. Em produção, configure `FRONTEND_URL` no backend
 
+### Problema 5: Erro "X.checkout(...).then is not a function"
+**Sintoma:** Erro ao abrir checkout do Mercado Pago, backend funcionando
+
+**Solução:**
+1. A API do Mercado Pago mudou - o método `.checkout()` não retorna mais Promise
+2. Veja o guia completo: [`ERRO_MERCADOPAGO_CHECKOUT.md`](ERRO_MERCADOPAGO_CHECKOUT.md)
+3. Limpe o cache do navegador (Ctrl+F5)
+4. Verifique se está usando a versão 2.x do SDK
+
 ## 🧪 Teste Passo a Passo
 
 ### 1. Teste do Backend
@@ -96,9 +105,23 @@ No console do navegador:
 // Verifique se o SDK está carregado
 console.log(window.MercadoPago);
 
+// Verifique a versão
+console.log('Versão do SDK:', window.MercadoPago?.VERSION);
+
 // Tente inicializar manualmente
 const mp = new MercadoPago('sua_chave_publica');
 console.log(mp);
+
+// Teste o método checkout (nova API)
+try {
+  const checkout = mp.checkout({
+    preference: { id: 'test' },
+    autoOpen: false
+  });
+  console.log('✅ Nova API funciona');
+} catch (error) {
+  console.error('❌ Erro na API:', error);
+}
 ```
 
 ## 📝 Logs Importantes
@@ -170,5 +193,6 @@ Se o problema persistir:
 - [ ] Internet funcionando
 - [ ] Cache limpo
 - [ ] Logs sem erros críticos
+- [ ] API do Mercado Pago atualizada (sem erro .then)
 
 Se todos os itens estiverem marcados, o pagamento deve funcionar corretamente!
