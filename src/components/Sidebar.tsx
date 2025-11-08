@@ -1,5 +1,6 @@
 import styles from './Sidebar.module.css';
 import { logoutUser } from '../services/authService';
+import { useAuth } from '../contexts/AuthContext';
 
 interface SidebarProps {
   activeTab: string;
@@ -8,6 +9,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ activeTab, onTabChange, isOpen = false }: SidebarProps) {
+  const { userProfile } = useAuth();
   const menuItems = [
     { id: 'calc-hour', label: 'Calcule o Valor/Hora', disabled: false },
     { id: 'budget', label: 'Fazer Orçamento', disabled: false },
@@ -23,10 +25,34 @@ export function Sidebar({ activeTab, onTabChange, isOpen = false }: SidebarProps
     }
   };
 
+  const getPlanBadge = () => {
+    const plan = userProfile?.subscription?.plan || 'free';
+    const status = userProfile?.subscription?.status || 'inactive';
+    
+    const planNames = {
+      free: 'Grátis',
+      pro: 'Pro',
+      agency: 'Agência'
+    };
+
+    const planColors = {
+      free: styles.badgeFree,
+      pro: styles.badgePro,
+      agency: styles.badgeAgency
+    };
+
+    if (status !== 'active') {
+      return <span className={`${styles.planBadge} ${styles.badgeInactive}`}>Inativo</span>;
+    }
+
+    return <span className={`${styles.planBadge} ${planColors[plan]}`}>{planNames[plan]}</span>;
+  };
+
   return (
     <div className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}>
       <div className={styles.logo}>
         <h1>CálculoCerto</h1>
+        {getPlanBadge()}
       </div>
       
       <nav className={styles.navigation}>

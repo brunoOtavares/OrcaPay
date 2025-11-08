@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import styles from './Profile.module.css';
 import { useAuth } from '../contexts/AuthContext';
+import { SubscriptionManager } from './SubscriptionManager';
 
 interface SavedQuote {
   id: string;
@@ -22,6 +23,7 @@ interface SavedQuote {
 export function Profile() {
   const { userProfile } = useAuth();
   const [completedProjects, setCompletedProjects] = useState<SavedQuote[]>([]);
+  const [activeTab, setActiveTab] = useState<'stats' | 'subscription'>('stats');
 
   useEffect(() => {
     // Usar dados do Firebase
@@ -84,13 +86,30 @@ export function Profile() {
   return (
     <div className={styles.profile}>
       <div className={styles.header}>
-        <h2>Perfil e Estatísticas</h2>
-        <p>Acompanhe seu desempenho e projetos concluídos</p>
+        <h2>Perfil</h2>
+        <p>Gerencie suas estatísticas e assinatura</p>
       </div>
-      
-      <div className={styles.content}>
-        {/* Estatísticas Gerais */}
-        <div className={styles.statsGrid}>
+
+      {/* Tabs */}
+      <div className={styles.tabs}>
+        <button 
+          className={`${styles.tab} ${activeTab === 'stats' ? styles.tabActive : ''}`}
+          onClick={() => setActiveTab('stats')}
+        >
+          📊 Estatísticas
+        </button>
+        <button 
+          className={`${styles.tab} ${activeTab === 'subscription' ? styles.tabActive : ''}`}
+          onClick={() => setActiveTab('subscription')}
+        >
+          💳 Assinatura
+        </button>
+      </div>
+
+      {activeTab === 'stats' ? (
+        <div className={styles.content}>
+          {/* Estatísticas Gerais */}
+          <div className={styles.statsGrid}>
           <div className={styles.statCard}>
             <div className={styles.statIcon}>
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -188,8 +207,13 @@ export function Profile() {
               ))}
             </div>
           )}
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className={styles.subscriptionContent}>
+          <SubscriptionManager />
+        </div>
+      )}
     </div>
   );
 }

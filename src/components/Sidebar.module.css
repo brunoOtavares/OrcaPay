@@ -18,6 +18,9 @@
   padding: 0 var(--spacing-xl) var(--spacing-xl);
   margin-bottom: var(--spacing-xl);
   position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
 }
 
 .logo::after {
@@ -37,9 +40,41 @@
   margin: 0;
   text-align: left;
   letter-spacing: -0.02em;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
+}
+
+.planBadge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  width: fit-content;
+}
+
+.badgeFree {
+  background: rgba(99, 102, 241, 0.1);
+  color: #6366f1;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.badgePro {
+  background: rgba(52, 199, 89, 0.1);
+  color: #34c759;
+  border: 1px solid rgba(52, 199, 89, 0.3);
+}
+
+.badgeAgency {
+  background: rgba(255, 149, 0, 0.1);
+  color: #ff9500;
+  border: 1px solid rgba(255, 149, 0, 0.3);
+}
+
+.badgeInactive {
+  background: rgba(142, 142, 147, 0.1);
+  color: #8e8e93;
+  border: 1px solid rgba(142, 142, 147, 0.3);
 }
 
 .navigation {

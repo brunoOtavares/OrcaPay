@@ -89,15 +89,15 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
               <div className={styles.mockupContent}>
                 <div className={styles.mockupRow}>
                   <span>Projeto Web Design</span>
-                  <span className={styles.mockupPrice}>R$ 3.500,00</span>
+                  <span className={styles.mockupPrice}>R$ 2.500,00</span>
                 </div>
                 <div className={styles.mockupRow}>
                   <span>Logo + Identidade Visual</span>
-                  <span className={styles.mockupPrice}>R$ 2.800,00</span>
+                  <span className={styles.mockupPrice}>R$ 980,00</span>
                 </div>
                 <div className={styles.mockupRow}>
                   <span>Landing Page</span>
-                  <span className={styles.mockupPrice}>R$ 1.900,00</span>
+                  <span className={styles.mockupPrice}>R$ 500,00</span>
                 </div>
               </div>
             </div>

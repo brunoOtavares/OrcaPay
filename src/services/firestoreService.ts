@@ -10,6 +10,13 @@ export interface UserProfile {
   email: string;
   createdAt: string;
   hourlyRate: number;
+  subscription?: {
+    plan: 'free' | 'pro' | 'agency';
+    status: 'active' | 'inactive' | 'canceled';
+    startDate?: string;
+    endDate?: string;
+    mercadoPagoSubscriptionId?: string;
+  };
   calculatorData?: {
     fixedCosts: Array<{ description: string; value: number }>;
     variableCosts: Array<{ description: string; value: number }>;
@@ -60,6 +67,11 @@ export const createUserProfile = async (userId: string, email: string): Promise<
       email,
       createdAt: new Date().toISOString(),
       hourlyRate: 50,
+      subscription: {
+        plan: 'free',
+        status: 'active',
+        startDate: new Date().toISOString()
+      },
       calculatorData: {
         fixedCosts: [],
         variableCosts: [],
@@ -210,5 +222,19 @@ export const completeProject = async (userId: string, quoteId: string): Promise<
   } catch (error) {
     console.error('Erro ao concluir projeto:', error);
     throw new Error('Erro ao concluir projeto');
+  }
+};
+
+// Atualizar assinatura
+export const updateSubscription = async (
+  userId: string, 
+  subscription: UserProfile['subscription']
+): Promise<void> => {
+  try {
+    const docRef = doc(db, 'users', userId);
+    await updateDoc(docRef, { subscription });
+  } catch (error) {
+    console.error('Erro ao atualizar assinatura:', error);
+    throw new Error('Erro ao atualizar assinatura');
   }
 };
