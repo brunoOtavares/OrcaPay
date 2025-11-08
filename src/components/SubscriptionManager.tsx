@@ -113,10 +113,11 @@ export function SubscriptionManager() {
       // Chamar backend para criar preferência de pagamento
       console.log('Criando preferência de pagamento...');
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 segundos
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 segundos (aumentado para Render)
       
       let response;
       try {
+        console.log(`⏱️ Aguardando resposta do backend (timeout: 30s)...`);
         response = await fetch(`${backendUrl}/api/create-preference`, {
           method: 'POST',
           headers: {
@@ -134,7 +135,7 @@ export function SubscriptionManager() {
         console.error('Erro na requisição:', fetchError);
         
         if (fetchError instanceof Error && fetchError.name === 'AbortError') {
-          throw new Error(`O backend está demorando para responder. Verifique se o servidor está online em ${backendUrl}`);
+          throw new Error(`O backend está demorando muito para responder (mais de 30s). Serviços como Render podem precisar de tempo para "acordar". Tente novamente em alguns instantes.`);
         } else {
           throw new Error(`Não foi possível conectar ao backend em ${backendUrl}. Verifique se o servidor está online.`);
         }

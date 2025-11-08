@@ -116,7 +116,7 @@ export const checkBackendConnection = async (): Promise<{ connected: boolean; er
     console.log(`🔍 Verificando conexão com backend: ${backendUrl}`);
     
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 segundos (aumentado para Render)
     
     const startTime = Date.now();
     const response = await fetch(`${backendUrl}/`, {
@@ -156,7 +156,7 @@ export const checkBackendConnection = async (): Promise<{ connected: boolean; er
     let errorMessage = 'Erro desconhecido ao conectar ao backend';
     if (error instanceof Error) {
       if (error.name === 'AbortError') {
-        errorMessage = 'Timeout ao conectar ao backend (10s)';
+        errorMessage = 'Timeout ao conectar ao backend (15s). Serviços como Render podem precisar de tempo para "acordar".';
       } else if (error.message.includes('fetch')) {
         errorMessage = 'Erro de rede ao conectar ao backend';
       } else {
