@@ -69,7 +69,7 @@ export const createUserProfile = async (userId: string, email: string): Promise<
       hourlyRate: 50,
       subscription: {
         plan: 'free',
-        status: 'active',
+        status: 'inactive',
         startDate: new Date().toISOString()
       },
       calculatorData: {

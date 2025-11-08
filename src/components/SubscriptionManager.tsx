@@ -52,7 +52,7 @@ export function SubscriptionManager() {
       price: 0,
       features: [
         'Cálculo de valor/hora',
-        'Até 10 orçamentos/mês',
+        'Até 5 orçamentos/mês',
         'Gestão básica de clientes',
         'Salvamento na nuvem',
         'Suporte por email'
@@ -61,7 +61,7 @@ export function SubscriptionManager() {
     {
       id: 'pro',
       name: 'Pro',
-      price: 1,
+      price: 19.99,
       features: [
         'Tudo do plano Grátis',
         'Orçamentos ilimitados',
@@ -74,7 +74,9 @@ export function SubscriptionManager() {
     {
       id: 'agency',
       name: 'Agência',
-      price: 1.50,
+      price: 99.99,
+      disabled: true,
+      comingSoon: true,
       features: [
         'Tudo do plano Pro',
         'Múltiplos usuários',
@@ -344,6 +346,7 @@ export function SubscriptionManager() {
               `}
             >
               {plan.id === 'pro' && <div className={styles.badge}>Mais Popular</div>}
+              {plan.comingSoon && <div className={styles.badgeComingSoon}>Em Construção 🚧</div>}
               {isCurrentPlan && <div className={styles.badgeCurrent}>Plano Atual</div>}
 
               <h3>{plan.name}</h3>
@@ -361,6 +364,10 @@ export function SubscriptionManager() {
               {plan.id === 'free' ? (
                 <button className={styles.planBtn} disabled>
                   {isCurrentPlan ? 'Plano Atual' : 'Plano Gratuito'}
+                </button>
+              ) : plan.disabled ? (
+                <button className={styles.planBtnDisabled} disabled>
+                  Em Construção 🚧
                 </button>
               ) : (
                 <>

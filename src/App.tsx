@@ -72,6 +72,39 @@ function AppContent() {
   }, [userProfile])
 
   const handleSaveQuote = async (quote: Omit<SavedQuote, 'id' | 'createdAt'>) => {
+    console.log('💾 handleSaveQuote chamado');
+    
+    // Verificar limite de orçamentos para plano gratuito
+    const isFreePlan = !userProfile?.subscription || 
+                       userProfile.subscription.plan === 'free' ||
+                       userProfile.subscription.status !== 'active';
+    
+    console.log('📋 Verificação de limite:', {
+      isFreePlan,
+      totalQuotes: quotes.length,
+      subscription: userProfile?.subscription
+    });
+    
+    if (isFreePlan) {
+      // Contar orçamentos deste mês
+      const now = new Date();
+      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      
+      const quotesThisMonth = quotes.filter(q => {
+        const quoteDate = new Date(q.createdAt);
+        return quoteDate >= firstDayOfMonth;
+      }).length;
+      
+      console.log('📅 Orçamentos este mês:', quotesThisMonth);
+      
+      if (quotesThisMonth >= 5) {
+        console.log('🚫 BLOQUEADO - Limite atingido!');
+        alert('Você atingiu o limite de 5 orçamentos no plano gratuito. Faça upgrade para continuar!');
+        setActiveTab('profile'); // Redirecionar para a aba de perfil/assinaturas
+        return;
+      }
+    }
+
     const newQuote: SavedQuote = {
       ...quote,
       id: Date.now().toString(),

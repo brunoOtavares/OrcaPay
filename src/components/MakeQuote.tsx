@@ -71,6 +71,58 @@ export function MakeQuote({ onSaveQuote }: MakeQuoteProps) {
   const [hasHourlyRate, setHasHourlyRate] = useState(false);
   const [confirmFinalPrice, setConfirmFinalPrice] = useState<string>('');
 
+  // Verificar limite de orçamentos
+  const getQuotesThisMonth = () => {
+    if (!userProfile?.quotes) return 0;
+    
+    const now = new Date();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    
+    const filtered = userProfile.quotes.filter(quote => {
+      const quoteDate = new Date(quote.createdAt);
+      return quoteDate >= firstDayOfMonth;
+    });
+    
+    console.log('📅 Filtrando orçamentos:', {
+      mesAtual: `${now.getMonth() + 1}/${now.getFullYear()}`,
+      primeiroDiaDoMes: firstDayOfMonth.toISOString(),
+      totalOrçamentos: userProfile.quotes.length,
+      orçamentosEsteMês: filtered.length,
+      orçamentos: filtered.map(q => ({
+        id: q.id,
+        cliente: q.clientName,
+        data: q.createdAt,
+        dataParsed: new Date(q.createdAt).toLocaleDateString('pt-BR')
+      }))
+    });
+    
+    return filtered.length;
+  };
+
+  const isFreePlan = !userProfile?.subscription || 
+                     userProfile.subscription.plan === 'free' ||
+                     userProfile.subscription.status !== 'active';
+  const quotesThisMonth = getQuotesThisMonth();
+  const hasReachedLimit = isFreePlan && quotesThisMonth >= 5;
+
+  // Debug detalhado
+  console.log('🔍 Subscription Debug:', {
+    hasSubscription: !!userProfile?.subscription,
+    subscriptionObject: userProfile?.subscription,
+    plan: userProfile?.subscription?.plan,
+    status: userProfile?.subscription?.status,
+    statusIsActive: userProfile?.subscription?.status === 'active',
+    statusIsNotActive: userProfile?.subscription?.status !== 'active'
+  });
+
+  console.log('📊 Quota Check:', {
+    isFreePlan,
+    quotesThisMonth,
+    hasReachedLimit,
+    LIMITE: 5,
+    totalQuotes: userProfile?.quotes?.length || 0
+  });
+
   useEffect(() => {
     // Buscar hourlyRate do Firebase
     if (userProfile?.hourlyRate) {
@@ -152,6 +204,17 @@ export function MakeQuote({ onSaveQuote }: MakeQuoteProps) {
   };
 
   const handleConfirmQuote = () => {
+    console.log('🔍 Tentando confirmar orçamento...', { hasReachedLimit, quotesThisMonth, isFreePlan });
+    
+    // Bloquear se o limite foi atingido
+    if (hasReachedLimit) {
+      console.log('❌ Bloqueado por limite!');
+      alert('Você atingiu o limite de 5 orçamentos no plano gratuito. Faça upgrade para continuar!');
+      setShowConfirmModal(false);
+      return;
+    }
+
+    console.log('✅ Prosseguindo com salvamento...');
     const priceToSave = parseCurrencyInput(confirmFinalPrice);
     
     if (isNaN(priceToSave) || priceToSave <= 0) {
@@ -209,6 +272,30 @@ export function MakeQuote({ onSaveQuote }: MakeQuoteProps) {
     <div className={styles.container}>
       <div className={styles.quoteContent}>
         <h2>Faça o Orçamento do seu Projeto</h2>
+        
+        {/* Aviso de limite atingido */}
+        {hasReachedLimit && (
+          <div className={styles.limitWarning}>
+            <span className={styles.warningIcon}>⚠️</span>
+            <div className={styles.warningContent}>
+              <strong>Limite atingido!</strong>
+              <p>Você atingiu o limite de 5 orçamentos no plano gratuito este mês.</p>
+              <button 
+                className={styles.upgradeButton}
+                onClick={() => window.location.href = '#assinaturas'}
+              >
+                Fazer Upgrade
+              </button>
+            </div>
+          </div>
+        )}
+        
+        {/* Contador de orçamentos para plano gratuito */}
+        {isFreePlan && !hasReachedLimit && (
+          <div className={styles.quotaInfo}>
+            📊 Você usou <strong>{quotesThisMonth}</strong> de <strong>5</strong> orçamentos este mês
+          </div>
+        )}
         
         <div className={styles.mainGrid}>
           {/* Coluna da Esquerda - Informações do Projeto */}
@@ -397,8 +484,10 @@ export function MakeQuote({ onSaveQuote }: MakeQuoteProps) {
               <button 
                 className={styles.confirmButton}
                 onClick={handleOpenConfirmModal}
+                disabled={hasReachedLimit}
+                style={hasReachedLimit ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
               >
-                Confirmar e Enviar para Clientes
+                {hasReachedLimit ? 'Limite Atingido - Faça Upgrade' : 'Confirmar e Enviar para Clientes'}
               </button>
             </section>
           </div>

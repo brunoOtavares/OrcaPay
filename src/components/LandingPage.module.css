@@ -430,6 +430,12 @@
   box-shadow: 0 0 40px rgba(99, 102, 241, 0.2);
 }
 
+.pricingCardDisabled {
+  opacity: 0.7;
+  filter: grayscale(50%);
+  border: 2px dashed var(--border-color);
+}
+
 .badge {
   position: absolute;
   top: -15px;

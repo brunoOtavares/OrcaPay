@@ -187,7 +187,7 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
             </div>
             <ul className={styles.featuresList}>
               <li>✓ Cálculo de valor/hora</li>
-              <li>✓ Até 10 orçamentos/mês</li>
+              <li>✓ Até 5 orçamentos/mês</li>
               <li>✓ Gestão básica de clientes</li>
               <li>✓ Salvamento na nuvem</li>
               <li>✓ Suporte por email</li>
@@ -198,7 +198,7 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
             <div className={styles.badge}>Mais Popular</div>
             <h3>Pro</h3>
             <div className={styles.price}>
-              <span className={styles.priceValue}>R$ 1</span>
+              <span className={styles.priceValue}>R$ 19,99</span>
               <span className={styles.pricePeriod}>/mês</span>
             </div>
             <ul className={styles.featuresList}>
@@ -211,10 +211,11 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
             </ul>
             <button className={styles.pricingBtnFeatured} onClick={onRegister}>Escolher Pro</button>
           </div>
-          <div className={styles.pricingCard}>
+          <div className={`${styles.pricingCard} ${styles.pricingCardDisabled}`}>
+            <div className={styles.badge}>Em Construção</div>
             <h3>Agência</h3>
             <div className={styles.price}>
-              <span className={styles.priceValue}>R$ 1,50</span>
+              <span className={styles.priceValue}>R$ 99,99</span>
               <span className={styles.pricePeriod}>/mês</span>
             </div>
             <ul className={styles.featuresList}>
@@ -225,7 +226,7 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
               <li>✓ Suporte 24/7</li>
               <li>✓ Treinamento incluído</li>
             </ul>
-            <button className={styles.pricingBtn} onClick={onRegister}>Escolher Agência</button>
+            <button className={styles.pricingBtn} disabled style={{opacity: 0.6, cursor: 'not-allowed'}}>Em Construção</button>
           </div>
         </div>
       </section>
