@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { updateSubscription } from '../services/firestoreService';
 import styles from './SubscriptionManager.module.css';
@@ -10,6 +10,23 @@ export function SubscriptionManager() {
 
   const currentPlan = userProfile?.subscription?.plan || 'free';
   const currentStatus = userProfile?.subscription?.status || 'inactive';
+
+  // Recarregar perfil periodicamente para detectar mudanças de assinatura
+  useEffect(() => {
+    if (!currentUser) return;
+
+    // Recarrega imediatamente ao montar o componente
+    refreshUserProfile();
+
+    // Depois recarrega a cada 5 segundos enquanto não houver assinatura ativa
+    const interval = setInterval(() => {
+      if (currentStatus !== 'active') {
+        refreshUserProfile();
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [currentUser, currentStatus, refreshUserProfile]);
 
   const plans = [
     {
