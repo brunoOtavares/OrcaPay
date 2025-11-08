@@ -195,19 +195,48 @@ export function SubscriptionManager() {
         clearTimeout(checkoutTimeout);
         console.log('Checkout do Mercado Pago aberto com sucesso');
 
+        // Variável para controlar o polling
+        let pollingInterval: number | null = null;
+        let modalClosed = false;
+
+        // Função para verificar se o pagamento foi aprovado
+        const checkPaymentStatus = async () => {
+          try {
+            await refreshUserProfile();
+            // Se a assinatura for ativada, fechar o modal e mostrar sucesso
+            if (userProfile?.subscription?.status === 'active') {
+              console.log('✅ Pagamento detectado! Assinatura ativada.');
+              if (pollingInterval) clearInterval(pollingInterval);
+              setLoading(false);
+              alert('✅ Pagamento confirmado! Sua assinatura foi ativada com sucesso.');
+              // Forçar fechamento do modal se ainda estiver aberto
+              if (!modalClosed) {
+                window.location.reload(); // Recarrega para fechar o modal e atualizar interface
+              }
+            }
+          } catch (error) {
+            console.error('Erro ao verificar status do pagamento:', error);
+          }
+        };
+
         // Callbacks do checkout
         checkout.on('ready', () => {
-          console.log('Checkout pronto');
+          console.log('Checkout pronto - iniciando verificação automática de pagamento');
+          // Iniciar polling a cada 3 segundos para detectar pagamento
+          pollingInterval = setInterval(checkPaymentStatus, 3000) as unknown as number;
         });
 
         checkout.on('close', () => {
           console.log('Modal fechado');
+          modalClosed = true;
+          if (pollingInterval) clearInterval(pollingInterval);
           setLoading(false);
           refreshUserProfile();
         });
 
         checkout.on('payment', (result: any) => {
           console.log('Pagamento realizado:', result);
+          if (pollingInterval) clearInterval(pollingInterval);
           setLoading(false);
           // Aguardar webhook processar e atualizar perfil
           setTimeout(() => {
