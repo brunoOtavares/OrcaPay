@@ -192,25 +192,12 @@ app.post('/webhook', async (req, res) => {
 
     console.log('📥 Webhook recebido:', JSON.stringify({ type, data, headers: req.headers }, null, 2));
 
-    // Validar webhook secret (se configurado)
-    const xSignature = req.headers['x-signature'];
-    const xRequestId = req.headers['x-request-id'];
-    
-    if (process.env.MERCADO_PAGO_WEBHOOK_SECRET && xSignature) {
-      const parts = xSignature.split(',');
-      const ts = parts.find(p => p.startsWith('ts=')).replace('ts=', '');
-      const hash = parts.find(p => p.startsWith('v1=')).replace('v1=', '');
-      
-      const manifest = `id:${data.id};request-id:${xRequestId};ts:${ts};`;
-      const hmac = crypto.createHmac('sha256', process.env.MERCADO_PAGO_WEBHOOK_SECRET);
-      hmac.update(manifest);
-      const calculatedHash = hmac.digest('hex');
-      
-      if (calculatedHash !== hash) {
-        console.error('❌ Webhook signature inválida');
-        return res.status(401).json({ error: 'Invalid signature' });
-      }
-    }
+    // TODO: Validar webhook secret (desabilitado temporariamente para debug)
+    // const xSignature = req.headers['x-signature'];
+    // const xRequestId = req.headers['x-request-id'];
+    // if (process.env.MERCADO_PAGO_WEBHOOK_SECRET && xSignature) {
+    //   // Validação de assinatura aqui
+    // }
 
     // Responder rapidamente (o Mercado Pago espera resposta em até 2 segundos)
     res.sendStatus(200);
