@@ -44,6 +44,29 @@ function AppContent() {
     }
   }, [currentUser]);
 
+  // Detectar retorno do pagamento do Mercado Pago
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const path = window.location.pathname;
+    
+    // Se retornou do pagamento, redirecionar para o perfil
+    if (path.includes('/payment/') || urlParams.has('payment_id') || urlParams.has('collection_status')) {
+      // Limpar URL
+      window.history.replaceState({}, document.title, '/');
+      
+      // Atualizar perfil
+      if (currentUser) {
+        refreshUserProfile();
+        
+        // Redirecionar para perfil após 1 segundo
+        setTimeout(() => {
+          setActiveTab('profile');
+          alert('Pagamento processado! Aguarde alguns segundos para ver sua assinatura ativada.');
+        }, 1000);
+      }
+    }
+  }, [currentUser, refreshUserProfile]);
+
   // Sincronizar quotes do Firebase com o estado local
   useEffect(() => {
     if (userProfile) {
