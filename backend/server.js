@@ -126,6 +126,8 @@ app.post('/api/create-preference', async (req, res) => {
   try {
     const { planId, userId, userEmail } = req.body;
 
+    console.log('📦 Dados recebidos:', { planId, userId, userEmail });
+
     if (!planId || !userId || !userEmail) {
       return res.status(400).json({ 
         error: 'Dados incompletos. Envie: planId, userId, userEmail' 
@@ -133,6 +135,8 @@ app.post('/api/create-preference', async (req, res) => {
     }
 
     const plan = PLANS[planId];
+    console.log('💰 Plano selecionado:', plan);
+    
     if (!plan) {
       return res.status(400).json({ error: 'Plano inválido' });
     }
