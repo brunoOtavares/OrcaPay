@@ -136,8 +136,8 @@ export function SubscriptionManager() {
 
     } catch (error) {
       console.error('Erro ao processar pagamento:', error);
-      alert('Erro ao processar pagamento. Tente novamente.');
       setLoading(false);
+      alert('Erro ao criar pagamento. Verifique sua conexão e tente novamente.');
     }
   };
 
