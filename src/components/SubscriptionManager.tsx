@@ -27,7 +27,7 @@ export function SubscriptionManager() {
     {
       id: 'pro',
       name: 'Pro',
-      price: 29,
+      price: 1,
       features: [
         'Tudo do plano Grátis',
         'Orçamentos ilimitados',
@@ -40,7 +40,7 @@ export function SubscriptionManager() {
     {
       id: 'agency',
       name: 'Agência',
-      price: 99,
+      price: 1,
       features: [
         'Tudo do plano Pro',
         'Múltiplos usuários',

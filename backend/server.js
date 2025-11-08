@@ -47,13 +47,13 @@ const PLANS = {
     id: 'pro',
     title: 'Plano Pro',
     description: 'Orçamentos profissionais',
-    price: 29.00,
+    price: 1.00,
   },
   agency: {
     id: 'agency',
     title: 'Plano Agência',
     description: 'Recursos avançados para agências',
-    price: 99.00,
+    price: 1.00,
   }
 };
 
