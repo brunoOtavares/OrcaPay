@@ -6,6 +6,7 @@ import { Clients } from './components/Clients'
 import { Profile } from './components/Profile'
 import { MakeQuote } from './components/MakeQuote'
 import { Settings } from './components/Settings'
+import { PaymentResult } from './components/PaymentResult'
 import Login from './components/Login'
 import Register from './components/Register'
 import { LandingPage } from './components/LandingPage'
@@ -36,6 +37,7 @@ function AppContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
   const [showLanding, setShowLanding] = useState(!currentUser)
+  const [showPaymentResult, setShowPaymentResult] = useState(false)
 
   // Atualiza showLanding quando o estado de autenticação mudar
   useEffect(() => {
@@ -49,23 +51,18 @@ function AppContent() {
     const urlParams = new URLSearchParams(window.location.search);
     const path = window.location.pathname;
     
-    // Se retornou do pagamento, redirecionar para o perfil
-    if (path.includes('/payment/') || urlParams.has('payment_id') || urlParams.has('collection_status')) {
-      // Limpar URL
-      window.history.replaceState({}, document.title, '/');
-      
-      // Atualizar perfil
-      if (currentUser) {
-        refreshUserProfile();
-        
-        // Redirecionar para perfil após 1 segundo
-        setTimeout(() => {
-          setActiveTab('profile');
-          alert('Pagamento processado! Aguarde alguns segundos para ver sua assinatura ativada.');
-        }, 1000);
-      }
+    // Se retornou do pagamento, mostrar a página de resultado
+    if (
+      path.includes('/payment/') ||
+      urlParams.has('payment_id') ||
+      urlParams.has('collection_status') ||
+      urlParams.has('payment') ||
+      urlParams.has('status') ||
+      path.includes('/payment')
+    ) {
+      setShowPaymentResult(true);
     }
-  }, [currentUser, refreshUserProfile]);
+  }, []);
 
   // Sincronizar quotes do Firebase com o estado local
   useEffect(() => {
@@ -158,6 +155,22 @@ function AppContent() {
   }
 
   const renderContent = () => {
+    // Se está retornando do pagamento, mostrar a página de resultado
+    if (showPaymentResult) {
+      return (
+        <PaymentResult
+          onBackToApp={() => {
+            setShowPaymentResult(false);
+            // Limpar URL
+            window.history.replaceState({}, document.title, '/');
+            // Atualizar perfil e redirecionar para a aba de perfil
+            refreshUserProfile();
+            setActiveTab('profile');
+          }}
+        />
+      );
+    }
+
     switch (activeTab) {
       case 'calc-hour':
         return <BudgetCalculator />

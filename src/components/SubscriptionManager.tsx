@@ -115,6 +115,10 @@ export function SubscriptionManager() {
         checkoutOpened = true;
 
         // Callbacks do checkout
+        checkout.on('ready', () => {
+          console.log('Checkout pronto');
+        });
+
         checkout.on('close', () => {
           console.log('Modal fechado');
           setLoading(false);
@@ -124,10 +128,8 @@ export function SubscriptionManager() {
         checkout.on('payment', (result: any) => {
           console.log('Pagamento realizado:', result);
           setLoading(false);
-          setTimeout(() => {
-            refreshUserProfile();
-            alert('Pagamento realizado! Aguarde alguns segundos para ver sua assinatura ativada.');
-          }, 2000);
+          // Redirecionar para a página de resultado do pagamento
+          window.location.href = '/payment/success';
         });
 
         checkout.on('error', (error: any) => {

@@ -152,9 +152,9 @@ app.post('/api/create-preference', async (req, res) => {
         email: userEmail,
       },
       back_urls: {
-        success: `${process.env.FRONTEND_URL}/?payment=success`,
-        failure: `${process.env.FRONTEND_URL}/?payment=failure`,
-        pending: `${process.env.FRONTEND_URL}/?payment=pending`,
+        success: `${process.env.FRONTEND_URL}/payment/success`,
+        failure: `${process.env.FRONTEND_URL}/payment/failure`,
+        pending: `${process.env.FRONTEND_URL}/payment/pending`,
       },
       auto_return: 'approved',
       notification_url: `${process.env.BACKEND_URL || `http://localhost:${PORT}`}/webhook`,

@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import styles from './PaymentResult.module.css';
 
-export function PaymentResult() {
+interface PaymentResultProps {
+  onBackToApp?: () => void;
+}
+
+export function PaymentResult({ onBackToApp }: PaymentResultProps) {
   const { refreshUserProfile } = useAuth();
   const [loading, setLoading] = useState(true);
   const [paymentInfo, setPaymentInfo] = useState<any>(null);
@@ -89,15 +93,15 @@ export function PaymentResult() {
         )}
 
         <div className={styles.actions}>
-          <button 
+          <button
             className={styles.btnPrimary}
-            onClick={() => window.location.href = '/'}
+            onClick={onBackToApp || (() => window.location.href = '/')}
           >
             Ir para Meu Perfil
           </button>
-          <button 
+          <button
             className={styles.btnSecondary}
-            onClick={() => window.location.href = '/'}
+            onClick={onBackToApp || (() => window.location.href = '/')}
           >
             Voltar ao Início
           </button>
