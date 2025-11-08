@@ -23,7 +23,6 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
       <nav className={styles.navbar}>
         <div className={styles.navContainer}>
           <div className={styles.logo}>
-            <span className={styles.logoIcon}>📊</span>
             <span className={styles.logoText}>CálculoCerto</span>
           </div>
 
@@ -113,32 +112,26 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
         </div>
         <div className={styles.featuresGrid}>
           <div className={styles.featureCard}>
-            <div className={styles.featureIcon}>💰</div>
             <h3>Cálculo de Valor/Hora</h3>
             <p>Descubra quanto vale sua hora considerando todos os seus custos fixos, variáveis e margem de lucro desejada.</p>
           </div>
           <div className={styles.featureCard}>
-            <div className={styles.featureIcon}>📋</div>
             <h3>Orçamentos Inteligentes</h3>
             <p>Crie orçamentos profissionais com ajustes automáticos de complexidade, urgência e uso comercial.</p>
           </div>
           <div className={styles.featureCard}>
-            <div className={styles.featureIcon}>👥</div>
             <h3>Gestão de Clientes</h3>
             <p>Organize todos os seus projetos, acompanhe status e mantenha histórico completo de cada cliente.</p>
           </div>
           <div className={styles.featureCard}>
-            <div className={styles.featureIcon}>📊</div>
             <h3>Relatórios e Métricas</h3>
             <p>Visualize estatísticas dos seus projetos, faturamento total e projetos concluídos em tempo real.</p>
           </div>
           <div className={styles.featureCard}>
-            <div className={styles.featureIcon}>⚙️</div>
             <h3>Configurações Personalizadas</h3>
             <p>Ajuste multiplicadores de complexidade e urgência de acordo com seu mercado e experiência.</p>
           </div>
           <div className={styles.featureCard}>
-            <div className={styles.featureIcon}>☁️</div>
             <h3>Salvamento na Nuvem</h3>
             <p>Seus dados sempre seguros e acessíveis de qualquer dispositivo com sincronização em tempo real.</p>
           </div>
@@ -186,11 +179,11 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
               <span className={styles.pricePeriod}>/mês</span>
             </div>
             <ul className={styles.featuresList}>
-              <li>✓ Cálculo de valor/hora</li>
-              <li>✓ Até 5 orçamentos/mês</li>
-              <li>✓ Gestão básica de clientes</li>
-              <li>✓ Salvamento na nuvem</li>
-              <li>✓ Suporte por email</li>
+              <li>Cálculo de valor/hora</li>
+              <li>Até 5 orçamentos/mês</li>
+              <li>Gestão básica de clientes</li>
+              <li>Salvamento na nuvem</li>
+              <li>Suporte por email</li>
             </ul>
             <button className={styles.pricingBtn} onClick={onRegister}>Começar Grátis</button>
           </div>
@@ -202,12 +195,12 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
               <span className={styles.pricePeriod}>/mês</span>
             </div>
             <ul className={styles.featuresList}>
-              <li>✓ Tudo do plano Grátis</li>
-              <li>✓ Orçamentos ilimitados</li>
-              <li>✓ Relatórios avançados</li>
-              <li>✓ Exportação em PDF</li>
-              <li>✓ Suporte prioritário</li>
-              <li>✓ Sem marca d'água</li>
+              <li>Tudo do plano Grátis</li>
+              <li>Orçamentos ilimitados</li>
+              <li>Relatórios avançados</li>
+              <li>Exportação em PDF</li>
+              <li>Suporte prioritário</li>
+              <li>Sem marca d'água</li>
             </ul>
             <button className={styles.pricingBtnFeatured} onClick={onRegister}>Escolher Pro</button>
           </div>
@@ -219,12 +212,12 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
               <span className={styles.pricePeriod}>/mês</span>
             </div>
             <ul className={styles.featuresList}>
-              <li>✓ Tudo do plano Pro</li>
-              <li>✓ Múltiplos usuários</li>
-              <li>✓ Marca personalizada</li>
-              <li>✓ API de integração</li>
-              <li>✓ Suporte 24/7</li>
-              <li>✓ Treinamento incluído</li>
+              <li>Tudo do plano Pro</li>
+              <li>Múltiplos usuários</li>
+              <li>Marca personalizada</li>
+              <li>API de integração</li>
+              <li>Suporte 24/7</li>
+              <li>Treinamento incluído</li>
             </ul>
             <button className={styles.pricingBtn} disabled style={{opacity: 0.6, cursor: 'not-allowed'}}>Em Construção</button>
           </div>
@@ -239,7 +232,6 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
         </div>
         <div className={styles.testimonialsGrid}>
           <div className={styles.testimonialCard}>
-            <div className={styles.stars}>⭐⭐⭐⭐⭐</div>
             <p>"Antes eu cobrava no achismo e muitas vezes saía no prejuízo. Com o CálculoCerto aprendi a valorizar meu trabalho e meu faturamento aumentou 40%!"</p>
             <div className={styles.author}>
               <div className={styles.authorAvatar}>M</div>
@@ -250,7 +242,6 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
             </div>
           </div>
           <div className={styles.testimonialCard}>
-            <div className={styles.stars}>⭐⭐⭐⭐⭐</div>
             <p>"Ferramenta indispensável! Consegui organizar todos os meus projetos e agora tenho visibilidade total do meu negócio. Super recomendo!"</p>
             <div className={styles.author}>
               <div className={styles.authorAvatar}>J</div>
@@ -261,7 +252,6 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
             </div>
           </div>
           <div className={styles.testimonialCard}>
-            <div className={styles.stars}>⭐⭐⭐⭐⭐</div>
             <p>"Simplesmente perfeito! Interface limpa, fácil de usar e os cálculos são muito precisos. Minha agência não vive mais sem!"</p>
             <div className={styles.author}>
               <div className={styles.authorAvatar}>A</div>
@@ -288,10 +278,7 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
       <footer className={styles.footer}>
         <div className={styles.footerContent}>
           <div className={styles.footerSection}>
-            <h4>
-              <span className={styles.logoIcon}>📊</span>
-              CálculoCerto
-            </h4>
+            <h4>CálculoCerto</h4>
             <p>A forma inteligente de precificar projetos criativos e digitais.</p>
           </div>
           <div className={styles.footerSection}>
