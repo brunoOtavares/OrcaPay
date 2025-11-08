@@ -190,7 +190,7 @@ app.post('/webhook', async (req, res) => {
   try {
     const { type, data } = req.body;
 
-    console.log('📥 Webhook recebido:', { type, data });
+    console.log('📥 Webhook recebido:', JSON.stringify({ type, data, headers: req.headers }, null, 2));
 
     // Validar webhook secret (se configurado)
     const xSignature = req.headers['x-signature'];
@@ -220,13 +220,15 @@ app.post('/webhook', async (req, res) => {
       const paymentId = data.id;
       
       // Buscar detalhes do pagamento
+      console.log(`🔍 Buscando detalhes do pagamento: ${paymentId}`);
       const paymentData = await payment.get({ id: paymentId });
       
-      console.log('💰 Pagamento:', {
+      console.log('💰 Detalhes do pagamento:', JSON.stringify({
         id: paymentData.id,
         status: paymentData.status,
+        status_detail: paymentData.status_detail,
         metadata: paymentData.metadata,
-      });
+      }, null, 2));
 
       // Se o pagamento foi aprovado
       if (paymentData.status === 'approved') {
