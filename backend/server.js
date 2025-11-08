@@ -67,7 +67,7 @@ const PLANS = {
     id: 'agency',
     title: 'Plano Agência',
     description: 'Recursos avançados para agências',
-    price: 1.00,
+    price: 1.50,
   }
 };
 

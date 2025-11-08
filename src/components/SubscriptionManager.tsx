@@ -40,7 +40,7 @@ export function SubscriptionManager() {
     {
       id: 'agency',
       name: 'Agência',
-      price: 1,
+      price: 1.50,
       features: [
         'Tudo do plano Pro',
         'Múltiplos usuários',

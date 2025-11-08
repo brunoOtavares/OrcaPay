@@ -214,7 +214,7 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
           <div className={styles.pricingCard}>
             <h3>Agência</h3>
             <div className={styles.price}>
-              <span className={styles.priceValue}>R$ 1</span>
+              <span className={styles.priceValue}>R$ 1,50</span>
               <span className={styles.pricePeriod}>/mês</span>
             </div>
             <ul className={styles.featuresList}>
