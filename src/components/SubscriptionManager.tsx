@@ -100,13 +100,25 @@ export function SubscriptionManager() {
 
       const data = await response.json();
       
-      // Redirecionar para o Mercado Pago (PRODUÇÃO)
-      window.location.href = data.initPoint;
+      // Abrir checkout do Mercado Pago em modal/popup
+      const mp = new (window as any).MercadoPago(import.meta.env.VITE_MERCADO_PAGO_PUBLIC_KEY);
+      
+      mp.checkout({
+        preference: {
+          id: data.preferenceId
+        },
+        render: {
+          container: '#mercadopago-button', // Onde será renderizado (se necessário)
+          label: 'Pagar',
+        },
+        autoOpen: true, // Abre automaticamente
+      });
+
+      setLoading(false);
 
     } catch (error) {
       console.error('Erro ao processar pagamento:', error);
       alert('Erro ao processar pagamento. Tente novamente.');
-    } finally {
       setLoading(false);
     }
   };
