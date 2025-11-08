@@ -83,8 +83,8 @@ export function SubscriptionManager() {
 
       const data = await response.json();
       
-      // Redirecionar para o Mercado Pago (sandbox para testes)
-      window.location.href = data.sandboxInitPoint || data.initPoint;
+      // Redirecionar para o Mercado Pago (PRODUÇÃO)
+      window.location.href = data.initPoint;
 
     } catch (error) {
       console.error('Erro ao processar pagamento:', error);
