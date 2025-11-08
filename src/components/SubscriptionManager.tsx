@@ -103,18 +103,36 @@ export function SubscriptionManager() {
       // Abrir checkout do Mercado Pago em modal/popup
       const mp = new (window as any).MercadoPago(import.meta.env.VITE_MERCADO_PAGO_PUBLIC_KEY);
       
-      mp.checkout({
+      const checkout = mp.checkout({
         preference: {
           id: data.preferenceId
-        },
-        render: {
-          container: '#mercadopago-button', // Onde será renderizado (se necessário)
-          label: 'Pagar',
         },
         autoOpen: true, // Abre automaticamente
       });
 
-      setLoading(false);
+      // Callbacks do checkout
+      checkout.on('close', () => {
+        console.log('Modal fechado');
+        setLoading(false);
+        // Recarrega o perfil para verificar se o pagamento foi aprovado
+        refreshUserProfile();
+      });
+
+      checkout.on('payment', (result: any) => {
+        console.log('Pagamento realizado:', result);
+        setLoading(false);
+        // Aguarda um pouco para o webhook processar
+        setTimeout(() => {
+          refreshUserProfile();
+          alert('Pagamento realizado! Aguarde alguns segundos para ver sua assinatura ativada.');
+        }, 2000);
+      });
+
+      checkout.on('error', (error: any) => {
+        console.error('Erro no checkout:', error);
+        setLoading(false);
+        alert('Erro ao processar pagamento. Tente novamente.');
+      });
 
     } catch (error) {
       console.error('Erro ao processar pagamento:', error);
