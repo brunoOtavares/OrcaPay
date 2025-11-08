@@ -21,14 +21,43 @@ export function PaymentResult({ onBackToApp }: PaymentResultProps) {
       if (paymentId) {
         try {
           const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
-          const response = await fetch(`${backendUrl}/api/payment/${paymentId}`);
+          console.log(`Verificando pagamento ${paymentId} no backend: ${backendUrl}`);
+          
+          // Adicionar timeout para evitar carregamento infinito
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos
+          
+          const response = await fetch(`${backendUrl}/api/payment/${paymentId}`, {
+            signal: controller.signal
+          });
+          
+          clearTimeout(timeoutId);
+          
+          if (!response.ok) {
+            console.error(`Erro na resposta do backend: ${response.status} ${response.statusText}`);
+            throw new Error(`Erro ao verificar pagamento (${response.status})`);
+          }
+          
           const data = await response.json();
+          console.log('Dados do pagamento:', data);
           setPaymentInfo(data);
           
           // Atualizar perfil do usuário para pegar a nova assinatura
           await refreshUserProfile();
         } catch (error) {
           console.error('Erro ao verificar pagamento:', error);
+          if (error instanceof Error && error.name === 'AbortError') {
+            console.error('Timeout ao verificar pagamento');
+            setPaymentInfo({
+              error: 'Timeout ao verificar pagamento. Tente atualizar a página.',
+              status: 'error'
+            });
+          } else {
+            setPaymentInfo({
+              error: error instanceof Error ? error.message : 'Erro desconhecido',
+              status: 'error'
+            });
+          }
         }
       }
       setLoading(false);
@@ -38,6 +67,15 @@ export function PaymentResult({ onBackToApp }: PaymentResultProps) {
   }, [paymentId, refreshUserProfile]);
 
   const getStatusInfo = () => {
+    if (paymentInfo?.error) {
+      return {
+        icon: '⚠️',
+        title: 'Erro ao Verificar Pagamento',
+        message: paymentInfo.error,
+        color: 'error'
+      };
+    }
+    
     if (status === 'approved' || paymentInfo?.status === 'approved') {
       return {
         icon: '✅',

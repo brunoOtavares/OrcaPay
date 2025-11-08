@@ -1,0 +1,196 @@
+.diagnosticContainer {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.header h2 {
+  color: #333;
+  margin-bottom: 0.5rem;
+  font-size: 1.8rem;
+}
+
+.header p {
+  color: #666;
+  font-size: 1rem;
+}
+
+.statusGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.statusCard {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #ddd;
+  transition: transform 0.2s ease;
+}
+
+.statusCard:hover {
+  transform: translateY(-2px);
+}
+
+.statusCard.success {
+  border-left-color: #28a745;
+}
+
+.statusCard.error {
+  border-left-color: #dc3545;
+}
+
+.statusCard.pending {
+  border-left-color: #ffc107;
+}
+
+.statusHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.statusIcon {
+  font-size: 1.5rem;
+}
+
+.statusHeader h3 {
+  margin: 0;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.statusDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.errorItem,
+.warningItem,
+.successItem,
+.pendingItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.errorItem {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.warningItem {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.successItem {
+  background: #d4edda;
+  color: #155724;
+}
+
+.pendingItem {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.errorIcon,
+.warningIcon,
+.successIcon,
+.pendingIcon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.actions {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.checkButton {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.checkButton:hover:not(:disabled) {
+  background: #0056b3;
+}
+
+.checkButton:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.helpSection {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.helpSection h3 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+}
+
+.helpItems {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.helpItem {
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 3px solid #007bff;
+}
+
+.helpItem h4 {
+  color: #333;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.helpItem p {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .diagnosticContainer {
+    padding: 1rem;
+  }
+  
+  .statusGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .helpItems {
+    grid-template-columns: 1fr;
+  }
+}

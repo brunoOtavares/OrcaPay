@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { updateSubscription } from '../services/firestoreService';
+import { loadAndInitMercadoPago } from '../utils/mercadoPagoLoader';
+import { checkMercadoPagoConfig, checkBackendConnection } from '../utils/configChecker';
 import styles from './SubscriptionManager.module.css';
 
 export function SubscriptionManager() {
@@ -27,6 +29,21 @@ export function SubscriptionManager() {
 
     return () => clearInterval(interval);
   }, [currentUser, currentStatus, refreshUserProfile]);
+
+  // Verificar configurações ao montar o componente
+  useEffect(() => {
+    const configStatus = checkMercadoPagoConfig();
+    if (!configStatus.isValid) {
+      console.error('❌ Configuração do Mercado Pago inválida:', configStatus.errors);
+    }
+    
+    // Verificar conexão com o backend
+    checkBackendConnection().then(isConnected => {
+      if (!isConnected) {
+        console.error('❌ Backend não está acessível');
+      }
+    });
+  }, []);
 
   const plans = [
     {
@@ -78,10 +95,26 @@ export function SubscriptionManager() {
 
     setLoading(true);
     try {
+      // Verificar se a chave pública do Mercado Pago está configurada
+      const publicKey = import.meta.env.VITE_MERCADO_PAGO_PUBLIC_KEY;
+      if (!publicKey) {
+        throw new Error('Chave pública do Mercado Pago não configurada. Verifique as variáveis de ambiente.');
+      }
+
+      // Carregar e inicializar o SDK do Mercado Pago
+      console.log('Carregando SDK do Mercado Pago...');
+      const mp = await loadAndInitMercadoPago(publicKey);
+      console.log('SDK do Mercado Pago carregado com sucesso');
+
       // URL do backend (local ou produção)
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+      console.log('URL do backend:', backendUrl);
       
       // Chamar backend para criar preferência de pagamento
+      console.log('Criando preferência de pagamento...');
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 segundos
+      
       const response = await fetch(`${backendUrl}/api/create-preference`, {
         method: 'POST',
         headers: {
@@ -92,19 +125,40 @@ export function SubscriptionManager() {
           userId: currentUser.uid,
           userEmail: currentUser.email,
         }),
+        signal: controller.signal
       });
 
+      clearTimeout(timeoutId);
+      console.log('Resposta do backend:', response.status, response.statusText);
+
       if (!response.ok) {
-        throw new Error('Erro ao criar pagamento');
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Erro na resposta do backend:', errorData);
+        throw new Error(errorData.error || `Erro ao criar pagamento (${response.status})`);
       }
 
       const data = await response.json();
+      console.log('Preferência criada:', data);
+      
+      if (!data.preferenceId) {
+        throw new Error('ID da preferência não retornado pelo backend');
+      }
       
       // Abrir checkout do Mercado Pago em modal/popup
-      const mp = new (window as any).MercadoPago(import.meta.env.VITE_MERCADO_PAGO_PUBLIC_KEY);
+      console.log('Abrindo checkout do Mercado Pago...');
       
       // Flag para evitar mostrar erro se o modal abrir com sucesso
       let checkoutOpened = false;
+      let checkoutTimeout: number;
+
+      // Timeout para evitar carregamento infinito
+      checkoutTimeout = setTimeout(() => {
+        if (!checkoutOpened) {
+          console.error('Timeout ao abrir checkout do Mercado Pago');
+          setLoading(false);
+          alert('O sistema de pagamento está demorando para responder. Tente novamente.');
+        }
+      }, 15000); // 15 segundos
 
       mp.checkout({
         preference: {
@@ -113,6 +167,8 @@ export function SubscriptionManager() {
         autoOpen: true,
       }).then((checkout: any) => {
         checkoutOpened = true;
+        clearTimeout(checkoutTimeout);
+        console.log('Checkout do Mercado Pago aberto com sucesso');
 
         // Callbacks do checkout
         checkout.on('ready', () => {
@@ -134,11 +190,13 @@ export function SubscriptionManager() {
 
         checkout.on('error', (error: any) => {
           console.error('Erro no checkout:', error);
+          clearTimeout(checkoutTimeout);
           setLoading(false);
           alert('Erro ao processar pagamento. Tente novamente.');
         });
       }).catch((error: any) => {
         console.error('Erro ao abrir checkout:', error);
+        clearTimeout(checkoutTimeout);
         if (!checkoutOpened) {
           setLoading(false);
           alert('Erro ao abrir checkout. Tente novamente.');
@@ -148,7 +206,17 @@ export function SubscriptionManager() {
     } catch (error) {
       console.error('Erro ao criar preferência de pagamento:', error);
       setLoading(false);
-      alert('Erro ao criar pagamento. Verifique sua conexão e tente novamente.');
+      
+      let errorMessage = 'Erro ao criar pagamento. Verifique sua conexão e tente novamente.';
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          errorMessage = 'O backend está demorando para responder. Tente novamente em alguns instantes.';
+        } else {
+          errorMessage = `Erro ao criar pagamento: ${error.message}`;
+        }
+      }
+      
+      alert(errorMessage);
     }
   };
 
