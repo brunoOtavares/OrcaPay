@@ -41,6 +41,12 @@ export function Sidebar({ activeTab, onTabChange, isOpen = false }: SidebarProps
       agency: styles.badgeAgency
     };
 
+    // Se o plano é free, sempre mostrar "Grátis" independente do status
+    if (plan === 'free') {
+      return <span className={`${styles.planBadge} ${styles.badgeFree}`}>Grátis</span>;
+    }
+
+    // Para planos pagos (Pro/Agency), verificar se está ativo
     if (status !== 'active') {
       return <span className={`${styles.planBadge} ${styles.badgeInactive}`}>Inativo</span>;
     }

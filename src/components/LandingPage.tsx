@@ -198,9 +198,7 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
               <li>Tudo do plano Grátis</li>
               <li>Orçamentos ilimitados</li>
               <li>Relatórios avançados</li>
-              <li>Exportação em PDF</li>
               <li>Suporte prioritário</li>
-              <li>Sem marca d'água</li>
             </ul>
             <button className={styles.pricingBtnFeatured} onClick={onRegister}>Escolher Pro</button>
           </div>

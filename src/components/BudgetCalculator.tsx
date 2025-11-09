@@ -57,6 +57,8 @@ export function BudgetCalculator() {
   const [newVariableCost, setNewVariableCost] = useState<Cost>({ description: '', value: 0 });
   const [salary1, setSalary1] = useState<number>(initialData.salary1 || 0);
   const [salary2, setSalary2] = useState<number>(initialData.salary2 || 0);
+  const [salary1Input, setSalary1Input] = useState<string>(initialData.salary1 ? formatCurrency(initialData.salary1) : '');
+  const [salary2Input, setSalary2Input] = useState<string>(initialData.salary2 ? formatCurrency(initialData.salary2) : '');
 
 
   const handleCurrencyInput = (value: string, setter: (value: number) => void) => {
@@ -273,13 +275,25 @@ export function BudgetCalculator() {
                 className={styles.inputInline}
                 type="text"
                 placeholder="R$ 0,00"
-                value={salary1 > 0 ? formatCurrency(salary1) : ''}
+                value={salary1Input}
                 onChange={(e) => {
-                  const cleanValue = e.target.value.replace(/\D/g, '');
+                  const inputValue = e.target.value;
+                  setSalary1Input(inputValue);
+                  
+                  const cleanValue = inputValue.replace(/\D/g, '');
                   if (cleanValue === '') {
                     setSalary1(0);
                   } else {
-                    handleCurrencyInput(e.target.value, setSalary1);
+                    const numberValue = parseFloat(cleanValue) / 100;
+                    setSalary1(numberValue);
+                  }
+                }}
+                onBlur={() => {
+                  // Formata ao sair do campo
+                  if (salary1 > 0) {
+                    setSalary1Input(formatCurrency(salary1));
+                  } else {
+                    setSalary1Input('');
                   }
                 }}
               />
@@ -288,13 +302,25 @@ export function BudgetCalculator() {
                 className={styles.inputInline}
                 type="text"
                 placeholder="R$ 0,00"
-                value={salary2 > 0 ? formatCurrency(salary2) : ''}
+                value={salary2Input}
                 onChange={(e) => {
-                  const cleanValue = e.target.value.replace(/\D/g, '');
+                  const inputValue = e.target.value;
+                  setSalary2Input(inputValue);
+                  
+                  const cleanValue = inputValue.replace(/\D/g, '');
                   if (cleanValue === '') {
                     setSalary2(0);
                   } else {
-                    handleCurrencyInput(e.target.value, setSalary2);
+                    const numberValue = parseFloat(cleanValue) / 100;
+                    setSalary2(numberValue);
+                  }
+                }}
+                onBlur={() => {
+                  // Formata ao sair do campo
+                  if (salary2 > 0) {
+                    setSalary2Input(formatCurrency(salary2));
+                  } else {
+                    setSalary2Input('');
                   }
                 }}
               />

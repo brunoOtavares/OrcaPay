@@ -83,6 +83,84 @@ export function Profile() {
 
   const monthlyStats = getMonthlyStats();
 
+  // Verificar se é plano Pro
+  const isProPlan = userProfile?.subscription?.plan === 'pro' && userProfile?.subscription?.status === 'active';
+
+  // Estatísticas avançadas para plano Pro
+  const getAdvancedStats = () => {
+    if (!completedProjects.length) return null;
+
+    // Análise por tipo de projeto
+    const projectsByType: { [key: string]: { count: number; total: number } } = {};
+    completedProjects.forEach(project => {
+      const type = project.projectType || 'outro';
+      if (!projectsByType[type]) {
+        projectsByType[type] = { count: 0, total: 0 };
+      }
+      projectsByType[type].count++;
+      projectsByType[type].total += project.finalPrice;
+    });
+
+    // Análise por complexidade
+    const projectsByComplexity: { [key: string]: { count: number; total: number } } = {};
+    completedProjects.forEach(project => {
+      const complexity = project.complexity || 'media';
+      if (!projectsByComplexity[complexity]) {
+        projectsByComplexity[complexity] = { count: 0, total: 0 };
+      }
+      projectsByComplexity[complexity].count++;
+      projectsByComplexity[complexity].total += project.finalPrice;
+    });
+
+    // Taxa de urgência
+    const urgentProjects = completedProjects.filter(p => p.urgency);
+    const urgencyRate = (urgentProjects.length / completedProjects.length) * 100;
+
+    // Evolução mensal (últimos 6 meses)
+    const monthlyEvolution: { [key: string]: { count: number; total: number } } = {};
+    const now = new Date();
+    
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthKey = `${date.getMonth() + 1}/${date.getFullYear()}`;
+      monthlyEvolution[monthKey] = { count: 0, total: 0 };
+    }
+
+    completedProjects.forEach(project => {
+      if (!project.completedAt) return;
+      const date = new Date(project.completedAt);
+      const monthKey = `${date.getMonth() + 1}/${date.getFullYear()}`;
+      if (monthlyEvolution[monthKey]) {
+        monthlyEvolution[monthKey].count++;
+        monthlyEvolution[monthKey].total += project.finalPrice;
+      }
+    });
+
+    // Tempo médio de projeto (em dias)
+    const projectDurations = completedProjects
+      .filter(p => p.completedAt && p.createdAt)
+      .map(p => {
+        const start = new Date(p.createdAt);
+        const end = new Date(p.completedAt!);
+        return Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+      });
+    
+    const avgDuration = projectDurations.length > 0
+      ? projectDurations.reduce((a, b) => a + b, 0) / projectDurations.length
+      : 0;
+
+    return {
+      projectsByType,
+      projectsByComplexity,
+      urgencyRate,
+      urgentProjects: urgentProjects.length,
+      monthlyEvolution,
+      avgDuration
+    };
+  };
+
+  const advancedStats = isProPlan ? getAdvancedStats() : null;
+
   return (
     <div className={styles.profile}>
       <div className={styles.header}>
@@ -96,13 +174,13 @@ export function Profile() {
           className={`${styles.tab} ${activeTab === 'stats' ? styles.tabActive : ''}`}
           onClick={() => setActiveTab('stats')}
         >
-          📊 Estatísticas
+          Estatísticas
         </button>
         <button 
           className={`${styles.tab} ${activeTab === 'subscription' ? styles.tabActive : ''}`}
           onClick={() => setActiveTab('subscription')}
         >
-          💳 Assinatura
+          Assinatura
         </button>
       </div>
 
@@ -174,6 +252,161 @@ export function Profile() {
             </div>
           </div>
         </div>
+
+        {/* Estatísticas Avançadas - Apenas Pro */}
+        {isProPlan && advancedStats && completedProjects.length > 0 && (
+          <div className={styles.advancedStats}>
+            <div className={styles.sectionHeader}>
+              <h3>Análises Avançadas</h3>
+              <span className={styles.proBadge}>PRO</span>
+            </div>
+
+            {/* Análise por Tipo de Projeto */}
+            <div className={styles.analysisSection}>
+              <h4>Desempenho por Tipo de Projeto</h4>
+              <div className={styles.analysisGrid}>
+                {Object.entries(advancedStats.projectsByType).map(([type, data]) => (
+                  <div key={type} className={styles.analysisCard}>
+                    <div className={styles.analysisHeader}>
+                      <span className={styles.analysisType}>{type}</span>
+                      <span className={styles.analysisCount}>{data.count} projeto(s)</span>
+                    </div>
+                    <div className={styles.analysisValue}>
+                      {formatCurrency(data.total)}
+                    </div>
+                    <div className={styles.analysisAvg}>
+                      Média: {formatCurrency(data.total / data.count)}
+                    </div>
+                    <div className={styles.analysisBar}>
+                      <div 
+                        className={styles.analysisBarFill}
+                        style={{ width: `${(data.count / completedProjects.length) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Análise por Complexidade */}
+            <div className={styles.analysisSection}>
+              <h4>Distribuição por Complexidade</h4>
+              <div className={styles.complexityGrid}>
+                {Object.entries(advancedStats.projectsByComplexity).map(([complexity, data]) => {
+                  const percentage = (data.count / completedProjects.length) * 100;
+                  const avgValue = data.total / data.count;
+                  
+                  return (
+                    <div key={complexity} className={styles.complexityCard}>
+                      <div className={styles.complexityHeader}>
+                        <span className={styles.complexityLabel}>
+                          {complexity === 'baixa' ? 'Baixa' : complexity === 'media' ? 'Média' : 'Alta'}
+                        </span>
+                        <span className={styles.complexityPercentage}>{percentage.toFixed(0)}%</span>
+                      </div>
+                      <div className={styles.complexityStats}>
+                        <div className={styles.complexityStat}>
+                          <span>Projetos:</span>
+                          <strong>{data.count}</strong>
+                        </div>
+                        <div className={styles.complexityStat}>
+                          <span>Total:</span>
+                          <strong>{formatCurrency(data.total)}</strong>
+                        </div>
+                        <div className={styles.complexityStat}>
+                          <span>Média:</span>
+                          <strong>{formatCurrency(avgValue)}</strong>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Métricas de Eficiência */}
+            <div className={styles.analysisSection}>
+              <h4>Métricas de Eficiência</h4>
+              <div className={styles.metricsGrid}>
+                <div className={styles.metricCard}>
+                  <div className={styles.metricIcon}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                  </div>
+                  <div className={styles.metricContent}>
+                    <h5>Taxa de Urgência</h5>
+                    <p className={styles.metricValue}>{advancedStats.urgencyRate.toFixed(1)}%</p>
+                    <span className={styles.metricLabel}>
+                      {advancedStats.urgentProjects} de {completedProjects.length} projetos
+                    </span>
+                  </div>
+                </div>
+
+                <div className={styles.metricCard}>
+                  <div className={styles.metricIcon}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                  </div>
+                  <div className={styles.metricContent}>
+                    <h5>Tempo Médio</h5>
+                    <p className={styles.metricValue}>{advancedStats.avgDuration.toFixed(0)} dias</p>
+                    <span className={styles.metricLabel}>Duração média dos projetos</span>
+                  </div>
+                </div>
+
+                <div className={styles.metricCard}>
+                  <div className={styles.metricIcon}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                      <polyline points="17 6 23 6 23 12"></polyline>
+                    </svg>
+                  </div>
+                  <div className={styles.metricContent}>
+                    <h5>Crescimento</h5>
+                    <p className={styles.metricValue}>
+                      {(() => {
+                        const months = Object.values(advancedStats.monthlyEvolution);
+                        if (months.length < 2) return '0%';
+                        const lastMonth = months[months.length - 1].total;
+                        const prevMonth = months[months.length - 2].total;
+                        if (prevMonth === 0) return '+100%';
+                        const growth = ((lastMonth - prevMonth) / prevMonth) * 100;
+                        return `${growth > 0 ? '+' : ''}${growth.toFixed(1)}%`;
+                      })()}
+                    </p>
+                    <span className={styles.metricLabel}>Variação último mês</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Upgrade para Pro */}
+        {!isProPlan && completedProjects.length > 0 && (
+          <div className={styles.upgradeCard}>
+            <div className={styles.upgradeContent}>
+              <h3>Desbloqueie Análises Avançadas</h3>
+              <p>Upgrade para o plano Pro e tenha acesso a:</p>
+              <ul>
+                <li>Desempenho por tipo de projeto</li>
+                <li>Distribuição por complexidade</li>
+                <li>Métricas de eficiência e crescimento</li>
+                <li>Análises detalhadas de performance</li>
+                <li>E muito mais!</li>
+              </ul>
+              <button 
+                className={styles.upgradeBtn}
+                onClick={() => setActiveTab('subscription')}
+              >
+                Fazer Upgrade para Pro
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Lista de Projetos Concluídos */}
         <div className={styles.completedSection}>

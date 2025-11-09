@@ -66,9 +66,8 @@ export function SubscriptionManager() {
         'Tudo do plano Grátis',
         'Orçamentos ilimitados',
         'Relatórios avançados',
-        'Exportação em PDF',
         'Suporte prioritário',
-        'Sem marca d\'água'
+        
       ]
     },
     {
