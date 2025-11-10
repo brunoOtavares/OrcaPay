@@ -30,7 +30,7 @@ const parseCurrencyInput = (value: string): number => {
 };
 
 export function BudgetCalculator() {
-  const { currentUser, userProfile, refreshUserProfile } = useAuth();
+  const { currentUser, userProfile } = useAuth();
   
   // Carrega dados do Firebase ou usa valores padrão
   const loadInitialData = (): CalculatorData => {
@@ -149,8 +149,8 @@ export function BudgetCalculator() {
         const hourlyRate = calculateHourlyRate();
         await updateFirebaseHourlyRate(currentUser.uid, hourlyRate);
         
-        // Atualizar o perfil no contexto
-        await refreshUserProfile();
+        // Não precisa chamar refreshUserProfile aqui - os dados já foram salvos
+        // e o componente já tem os dados atualizados localmente
         
         // Dispara evento customizado para atualizar outros componentes
         window.dispatchEvent(new CustomEvent('hourlyRateUpdated', { 
@@ -162,7 +162,7 @@ export function BudgetCalculator() {
     }, 500); // Aguarda 500ms após última alteração
 
     return () => clearTimeout(timer);
-  }, [fixedCosts, variableCosts, salary1, salary2, hoursPerDay, daysPerMonth, currentUser, refreshUserProfile]);
+  }, [fixedCosts, variableCosts, salary1, salary2, hoursPerDay, daysPerMonth, currentUser]);
 
   return (
     <div className={styles.budgetCalculator}>
