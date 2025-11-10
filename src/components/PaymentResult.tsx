@@ -64,7 +64,8 @@ export function PaymentResult({ onBackToApp }: PaymentResultProps) {
     };
 
     checkPayment();
-  }, [paymentId, refreshUserProfile]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paymentId]); // Apenas quando paymentId mudar
 
   const getStatusInfo = () => {
     if (paymentInfo?.error) {

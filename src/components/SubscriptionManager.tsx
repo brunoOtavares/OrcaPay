@@ -13,16 +13,15 @@ export function SubscriptionManager() {
   const currentPlan = userProfile?.subscription?.plan || 'free';
   const currentStatus = userProfile?.subscription?.status || 'inactive';
 
-  // Recarregar perfil periodicamente para detectar mudanças de assinatura
+  // Carregar perfil quando o componente monta ou quando o usuário muda
   useEffect(() => {
     if (!currentUser) return;
 
-    // Recarrega imediatamente ao montar o componente
+    // Carrega o perfil apenas uma vez ao montar ou quando currentUser muda
     refreshUserProfile();
-
-    // Não precisa de polling constante aqui - o polling durante o pagamento já cuida disso
-    // Este useEffect só carrega o perfil quando o componente monta
-  }, [currentUser, refreshUserProfile]);
+    
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser?.uid]); // Apenas quando o ID do usuário mudar
 
   // Verificar configurações ao montar o componente
   useEffect(() => {
