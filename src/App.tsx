@@ -246,6 +246,7 @@ function AppContent() {
       <Sidebar 
         activeTab={activeTab} 
         onTabChange={(tab) => {
+          console.log('App.tsx onTabChange called with tab:', tab)
           setActiveTab(tab)
           setSidebarOpen(false)
         }} 

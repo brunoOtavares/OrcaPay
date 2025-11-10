@@ -76,7 +76,10 @@ export function Sidebar({ activeTab, onTabChange, isOpen = false }: SidebarProps
       <div className={styles.bottomButtons}>
         <button 
           className={styles.configBtn}
-          onClick={() => onTabChange('settings')}
+          onClick={() => {
+            console.log('Config button clicked');
+            onTabChange('settings');
+          }}
           title="Configurações"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

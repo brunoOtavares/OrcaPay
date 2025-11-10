@@ -31,14 +31,14 @@ export function PaymentDiagnostic() {
     runDiagnostics();
   }, []);
 
-  const getStatusIcon = (status: boolean | { connected: boolean } | null) => {
-    if (status === null) return '⏳';
+  const getStatusIcon = (status: boolean | { connected: boolean } | null | undefined) => {
+    if (status === null || status === undefined) return '⏳';
     if (typeof status === 'boolean') return status ? '✅' : '❌';
     return status.connected ? '✅' : '❌';
   };
 
-  const getStatusColor = (status: boolean | { connected: boolean } | null) => {
-    if (status === null) return styles.pending;
+  const getStatusColor = (status: boolean | { connected: boolean } | null | undefined) => {
+    if (status === null || status === undefined) return styles.pending;
     if (typeof status === 'boolean') return status ? styles.success : styles.error;
     return status.connected ? styles.success : styles.error;
   };
