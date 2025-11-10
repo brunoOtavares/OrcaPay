@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { updateSubscription, getUserProfile } from '../services/firestoreService';
 import { loadAndInitMercadoPago } from '../utils/mercadoPagoLoader';
@@ -9,19 +9,20 @@ export function SubscriptionManager() {
   const { currentUser, userProfile, refreshUserProfile } = useAuth();
   const [loading, setLoading] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<'pro' | 'agency' | null>(null);
+  const hasLoadedProfile = useRef(false);
 
   const currentPlan = userProfile?.subscription?.plan || 'free';
   const currentStatus = userProfile?.subscription?.status || 'inactive';
 
-  // Carregar perfil quando o componente monta ou quando o usuário muda
+  // Carregar perfil apenas uma vez quando o componente monta
   useEffect(() => {
-    if (!currentUser) return;
+    if (!currentUser || hasLoadedProfile.current) return;
 
-    // Carrega o perfil apenas uma vez ao montar ou quando currentUser muda
+    console.log('🔄 SubscriptionManager: Carregando perfil pela primeira vez');
+    // Marca como carregado para evitar múltiplas chamadas
+    hasLoadedProfile.current = true;
     refreshUserProfile();
-    
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentUser?.uid]); // Apenas quando o ID do usuário mudar
+  }, [currentUser, refreshUserProfile]);
 
   // Verificar configurações ao montar o componente
   useEffect(() => {
