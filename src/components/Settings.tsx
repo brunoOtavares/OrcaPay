@@ -4,7 +4,6 @@ import type { SettingsData } from '../utils/settings';
 import { DEFAULT_SETTINGS } from '../utils/settings';
 import { useAuth } from '../contexts/AuthContext';
 import { updateSettings as updateFirebaseSettings } from '../services/firestoreService';
-import { PaymentDiagnostic } from './PaymentDiagnostic';
 
 export function Settings() {
   const { currentUser, userProfile, refreshUserProfile } = useAuth();
@@ -222,15 +221,6 @@ export function Settings() {
               </div>
             </div>
           </div>
-        </div>
-
-        <div className={styles.section}>
-          <h3>Diagnóstico do Sistema de Pagamento</h3>
-          <p className={styles.description}>
-            Use esta ferramenta para verificar se tudo está configurado corretamente para processar pagamentos.
-            Se você está enfrentando problemas com carregamento infinito durante o pagamento, execute este diagnóstico.
-          </p>
-          <PaymentDiagnostic />
         </div>
 
         <div className={styles.actions}>

@@ -20,15 +20,9 @@ export function SubscriptionManager() {
     // Recarrega imediatamente ao montar o componente
     refreshUserProfile();
 
-    // Depois recarrega a cada 5 segundos enquanto não houver assinatura ativa
-    const interval = setInterval(() => {
-      if (currentStatus !== 'active') {
-        refreshUserProfile();
-      }
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [currentUser, currentStatus, refreshUserProfile]);
+    // Não precisa de polling constante aqui - o polling durante o pagamento já cuida disso
+    // Este useEffect só carrega o perfil quando o componente monta
+  }, [currentUser, refreshUserProfile]);
 
   // Verificar configurações ao montar o componente
   useEffect(() => {
@@ -198,13 +192,34 @@ export function SubscriptionManager() {
 
         // Variável para controlar o polling
         let pollingInterval: number | null = null;
+        let paymentDetected = false;
+        let maxAttempts = 60; // 60 tentativas = 3 minutos (60 * 3s)
+        let attempts = 0;
 
         // Função para verificar se o pagamento foi aprovado
         const checkPaymentStatus = async () => {
           try {
-            console.log('🔍 Verificando status do pagamento...');
+            // Parar se já detectou pagamento
+            if (paymentDetected) {
+              if (pollingInterval) clearInterval(pollingInterval);
+              return;
+            }
+
+            attempts++;
+            console.log(`🔍 Verificando status do pagamento... (tentativa ${attempts}/${maxAttempts})`);
+            
+            // Parar após máximo de tentativas
+            if (attempts >= maxAttempts) {
+              console.log('⏱️ Tempo limite de verificação atingido');
+              if (pollingInterval) clearInterval(pollingInterval);
+              return;
+            }
+
             // Buscar perfil atualizado diretamente
-            if (!currentUser) return;
+            if (!currentUser) {
+              if (pollingInterval) clearInterval(pollingInterval);
+              return;
+            }
             
             const updatedProfile = await getUserProfile(currentUser.uid);
             console.log('📊 Status da assinatura:', updatedProfile?.subscription?.status);
@@ -212,6 +227,7 @@ export function SubscriptionManager() {
             // Se a assinatura for ativada, fechar o modal e mostrar sucesso
             if (updatedProfile?.subscription?.status === 'active') {
               console.log('✅ Pagamento detectado! Assinatura ativada.');
+              paymentDetected = true;
               if (pollingInterval) clearInterval(pollingInterval);
               setLoading(false);
               alert('✅ Pagamento confirmado! Sua assinatura foi ativada com sucesso.');
@@ -220,12 +236,15 @@ export function SubscriptionManager() {
             }
           } catch (error) {
             console.error('Erro ao verificar status do pagamento:', error);
+            // Em caso de erro, continuar tentando até maxAttempts
           }
         };
 
         // Callbacks do checkout
         checkout.on('ready', () => {
           console.log('Checkout pronto - iniciando verificação automática de pagamento');
+          attempts = 0;
+          paymentDetected = false;
           // Iniciar polling a cada 3 segundos para detectar pagamento
           pollingInterval = setInterval(checkPaymentStatus, 3000) as unknown as number;
         });
@@ -233,13 +252,16 @@ export function SubscriptionManager() {
         checkout.on('close', () => {
           console.log('Modal fechado pelo usuário');
           if (pollingInterval) clearInterval(pollingInterval);
+          pollingInterval = null;
           setLoading(false);
           refreshUserProfile();
         });
 
         checkout.on('payment', (result: any) => {
           console.log('Pagamento realizado:', result);
+          paymentDetected = true;
           if (pollingInterval) clearInterval(pollingInterval);
+          pollingInterval = null;
           setLoading(false);
           // Aguardar webhook processar e atualizar perfil
           setTimeout(() => {
